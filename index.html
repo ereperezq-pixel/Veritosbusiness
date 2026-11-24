@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#2E7D32">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="VeritosBusiness">
+  <meta name="description" content="Panel de gestión privado para distribuidora Herbalife">
+
+  <title>VeritosBusiness</title>
+
+  <!-- Manifest PWA -->
+  <link rel="manifest" href="./manifest.json">
+
+  <!-- Iconos Apple -->
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="./css/main.css">
+
+  <!-- Precarga de módulos críticos -->
+  <link rel="modulepreload" href="./js/app.js">
+  <link rel="modulepreload" href="./js/db.js">
+  <link rel="modulepreload" href="./js/auth.js">
+</head>
+<body>
+  <!-- Pantalla de carga inicial -->
+  <div id="vb-root">
+    <div style="min-height:100dvh;display:flex;align-items:center;justify-content:center;background:#2E7D32;">
+      <div style="text-align:center;color:#fff;">
+        <div style="font-size:3rem;font-weight:900;letter-spacing:-1px;margin-bottom:.5rem;">V</div>
+        <div style="font-size:1.1rem;font-weight:600;opacity:.85;">Cargando VeritosBusiness…</div>
+        <div style="margin-top:1.5rem;width:40px;height:40px;border:4px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;margin-inline:auto;"></div>
+      </div>
+    </div>
+  </div>
+
+  <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+
+  <!-- Módulo principal -->
+  <script type="module" src="./js/app.js"></script>
+
+  <!-- Fallback: navegadores sin soporte ES modules -->
+  <script nomodule>
+    document.getElementById('vb-root').innerHTML =
+      '<div style="text-align:center;padding:3rem;font-family:sans-serif">' +
+      '<h1>Navegador no compatible</h1>' +
+      '<p>VeritosBusiness requiere un navegador moderno (Chrome 80+, Firefox 75+, Safari 14+).</p>' +
+      '</div>';
+  </script>
+</body>
+</html>
