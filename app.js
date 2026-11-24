@@ -215,10 +215,13 @@ async function init() {
   }
 }
 
-// Registrar Service Worker
+// Registrar Service Worker — funciona en raíz y en subcarpeta GitHub Pages
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js').catch(console.warn);
+    // Calcula la base desde window.location para compatibilidad máxima
+    const base = window.location.pathname.replace(/\/[^/]*$/, '/');
+    navigator.serviceWorker.register(base + 'sw.js', { scope: base })
+      .catch(err => console.warn('SW no registrado:', err));
   });
 }
 
