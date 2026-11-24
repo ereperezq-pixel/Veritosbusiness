@@ -3,7 +3,7 @@
  * Compatible con subcarpeta de GitHub Pages (/Veritosbusiness/)
  */
 
-const CACHE_NAME = 'veritosbusiness-v1';
+const CACHE_NAME = 'veritosbusiness-v2';
 
 // La base se calcula desde la ubicación del propio SW
 const BASE = self.location.pathname.replace(/\/sw\.js$/, '/');
@@ -11,21 +11,8 @@ const BASE = self.location.pathname.replace(/\/sw\.js$/, '/');
 const CACHE_PATHS = [
   'index.html',
   'manifest.json',
-  'css/main.css',
-  'js/app.js',
-  'js/db.js',
-  'js/auth.js',
-  'js/ui.js',
-  'js/utils/prices.js',
-  'js/utils/whatsapp.js',
-  'js/utils/backup.js',
-  'js/views/dashboard.js',
-  'js/views/orders.js',
-  'js/views/clients.js',
-  'js/views/products.js',
-  'js/views/promotions.js',
-  'js/views/stats.js',
-  'js/views/settings.js',
+  'icons/icon-192.png',
+  'icons/icon-512.png',
   'assets/placeholder.png',
 ];
 

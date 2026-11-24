@@ -9,47 +9,3462 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="VeritosBusiness">
   <meta name="description" content="Panel de gestión privado para distribuidora Herbalife">
-
   <title>VeritosBusiness</title>
-
-  <!-- Manifest PWA -->
   <link rel="manifest" href="./manifest.json">
-
-  <!-- Iconos Apple -->
   <link rel="apple-touch-icon" href="./icons/icon-192.png">
+  <style>
+/* ═══════════════════════════════════════════════════════════════
+   VeritosBusiness — CSS principal
+   Paleta Herbalife: verde, blanco, grises claros
+═══════════════════════════════════════════════════════════════ */
 
-  <!-- CSS -->
-  <link rel="stylesheet" href="./css/main.css">
+:root {
+  --color-primary:       #2E7D32;
+  --color-primary-dark:  #1B5E20;
+  --color-primary-light: #A5D6A7;
+  --color-primary-bg:    #E8F5E9;
+  --color-secondary:     #43A047;
+  --color-accent:        #66BB6A;
+  --color-white:         #FFFFFF;
+  --color-bg:            #F5F7F5;
+  --color-surface:       #FFFFFF;
+  --color-border:        #E0E0E0;
+  --color-text:          #1A1A1A;
+  --color-text-muted:    #757575;
+  --color-danger:        #C62828;
+  --color-danger-bg:     #FFEBEE;
+  --color-warning:       #E65100;
+  --color-warning-bg:    #FFF3E0;
+  --color-info:          #1565C0;
+  --color-info-bg:       #E3F2FD;
+  --color-success:       #2E7D32;
+  --color-success-bg:    #E8F5E9;
 
-  <!-- Precarga de módulos críticos -->
-  <link rel="modulepreload" href="./js/app.js">
-  <link rel="modulepreload" href="./js/db.js">
-  <link rel="modulepreload" href="./js/auth.js">
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.08);
+  --shadow-md: 0 2px 8px rgba(0,0,0,.12);
+  --shadow-lg: 0 4px 20px rgba(0,0,0,.16);
+
+  --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-size-base: 16px;
+
+  --header-h: 56px;
+  --nav-w: 220px;
+}
+
+/* ─── Reset ──────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: var(--font-size-base); -webkit-text-size-adjust: 100%; }
+body {
+  font-family: var(--font);
+  background: var(--color-bg);
+  color: var(--color-text);
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+img { max-width: 100%; display: block; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+a { color: inherit; text-decoration: none; }
+ul { list-style: none; }
+
+/* ─── Layout ─────────────────────────────────────────────────── */
+.app-layout { display: flex; flex-direction: column; height: 100dvh; }
+
+.app-header {
+  height: var(--header-h);
+  background: var(--color-primary);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  padding: 0 1rem;
+  gap: 0.75rem;
+  box-shadow: var(--shadow-md);
+  flex-shrink: 0;
+  position: sticky; top: 0; z-index: 100;
+}
+.app-header__title { font-size: 1.1rem; font-weight: 700; flex: 1; }
+.app-header__menu-btn,
+.app-header__actions .icon-btn {
+  color: #fff;
+  font-size: 1.3rem;
+  padding: 0.5rem;
+  border-radius: var(--radius-sm);
+  transition: background .15s;
+}
+.app-header__menu-btn:hover, .icon-btn:hover { background: rgba(255,255,255,.15); }
+
+.app-body { flex: 1; display: flex; overflow: hidden; }
+
+/* ─── Sidebar ────────────────────────────────────────────────── */
+.side-nav {
+  width: var(--nav-w);
+  background: var(--color-surface);
+  border-right: 1px solid var(--color-border);
+  overflow-y: auto;
+  flex-shrink: 0;
+  transform: translateX(-100%);
+  position: fixed; top: var(--header-h); left: 0; bottom: 0;
+  transition: transform .25s ease;
+  z-index: 90;
+  box-shadow: var(--shadow-lg);
+}
+.side-nav--open { transform: translateX(0); }
+
+@media (min-width: 768px) {
+  .side-nav {
+    position: relative; top: 0;
+    transform: translateX(0);
+    box-shadow: none;
+  }
+  .app-header__menu-btn { display: none; }
+}
+
+.nav__list { padding: 1rem 0; }
+.nav__item {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 0.85rem 1.25rem;
+  cursor: pointer;
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  margin-right: 0.5rem;
+  transition: background .15s, color .15s;
+  color: var(--color-text);
+  font-size: 0.95rem;
+}
+.nav__item:hover  { background: var(--color-primary-bg); color: var(--color-primary); }
+.nav__item--active {
+  background: var(--color-primary-bg);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+.nav__icon { font-size: 1.3rem; width: 1.6rem; text-align: center; }
+
+/* ─── Main ───────────────────────────────────────────────────── */
+.app-main {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ─── Botones ────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;
+  padding: 0.65rem 1.1rem;
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: filter .15s, transform .1s;
+  white-space: nowrap;
+  min-height: 44px;
+}
+.btn:active { transform: scale(.97); }
+.btn--primary  { background: var(--color-primary);  color: #fff; }
+.btn--primary:hover  { filter: brightness(1.08); }
+.btn--secondary { background: #fff; color: var(--color-primary); border: 1.5px solid var(--color-primary); }
+.btn--secondary:hover { background: var(--color-primary-bg); }
+.btn--danger   { background: var(--color-danger);   color: #fff; }
+.btn--danger:hover   { filter: brightness(1.1); }
+.btn--success  { background: #2E7D32;               color: #fff; }
+.btn--ghost    { background: transparent; color: var(--color-primary); }
+.btn--ghost:hover { background: var(--color-primary-bg); }
+.btn--sm { padding: 0.4rem 0.8rem; font-size: 0.82rem; min-height: 36px; }
+.btn--full { width: 100%; }
+
+/* ─── Campos ─────────────────────────────────────────────────── */
+.field { display: flex; flex-direction: column; gap: 0.3rem; margin-bottom: 0.9rem; }
+.field__label { font-size: 0.85rem; font-weight: 600; color: var(--color-text-muted); }
+.field__input {
+  padding: 0.65rem 0.85rem;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 0.95rem;
+  font-family: inherit;
+  background: #fff;
+  transition: border-color .15s, box-shadow .15s;
+  min-height: 44px;
+  width: 100%;
+}
+.field__input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(46,125,50,.15);
+}
+textarea.field__input { resize: vertical; min-height: 80px; }
+select.field__input { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M0 0l6 8 6-8z' fill='%23757575'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.85rem center; padding-right: 2.2rem; }
+.field-row { display: flex; gap: 0.75rem; }
+.field-row .field { flex: 1; }
+
+.field__password-wrap { position: relative; }
+.field__eye { position: absolute; right: 0.5rem; top: 50%; transform: translateY(-50%); font-size: 1.1rem; padding: 0.25rem; }
+
+/* ─── Toggle ─────────────────────────────────────────────────── */
+.toggle { position: relative; display: inline-flex; width: 46px; height: 26px; cursor: pointer; }
+.toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+.toggle__slider {
+  position: absolute; inset: 0;
+  background: #ccc; border-radius: 13px;
+  transition: background .2s;
+}
+.toggle__slider::before {
+  content: ''; position: absolute;
+  width: 20px; height: 20px;
+  left: 3px; top: 3px;
+  background: #fff; border-radius: 50%;
+  transition: transform .2s;
+  box-shadow: var(--shadow-sm);
+}
+.toggle input:checked + .toggle__slider { background: var(--color-primary); }
+.toggle input:checked + .toggle__slider::before { transform: translateX(20px); }
+.toggle-label { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+
+/* ─── Tarjetas / Secciones ───────────────────────────────────── */
+.section { margin-bottom: 1.5rem; }
+.section__title { font-size: 0.9rem; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 0.6rem; }
+.section__header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem; }
+
+.view-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 1rem;
+}
+.view-header__title { font-size: 1.3rem; font-weight: 700; }
+
+/* ─── Chips y badges ─────────────────────────────────────────── */
+.chip { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+.badge { display: inline-flex; align-items: center; justify-content: center; background: var(--color-primary); color: #fff; border-radius: 999px; min-width: 1.4rem; height: 1.4rem; font-size: 0.75rem; font-weight: 700; padding: 0 0.3rem; }
+
+/* ─── Alertas ────────────────────────────────────────────────── */
+.alert { padding: 0.75rem 1rem; border-radius: var(--radius-md); font-size: 0.9rem; margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+.alert--warning { background: var(--color-warning-bg); color: var(--color-warning); border-left: 3px solid var(--color-warning); }
+.alert--danger  { background: var(--color-danger-bg);  color: var(--color-danger);  border-left: 3px solid var(--color-danger); }
+.alert--info    { background: var(--color-info-bg);    color: var(--color-info);    border-left: 3px solid var(--color-info); }
+.hidden { display: none !important; }
+
+/* ─── Dashboard ──────────────────────────────────────────────── */
+.dashboard__greeting { margin-bottom: 1rem; }
+.dashboard__greeting h2 { font-size: 1.2rem; font-weight: 700; }
+
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.75rem; }
+.stats-grid--4 { grid-template-columns: repeat(2, 1fr); }
+@media (min-width: 768px) { .stats-grid--4 { grid-template-columns: repeat(4, 1fr); } }
+
+.stat-card {
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  display: flex; flex-direction: column; gap: 0.3rem;
+  box-shadow: var(--shadow-sm);
+}
+.stat-card--green  { border-top: 3px solid var(--color-primary);  }
+.stat-card--blue   { border-top: 3px solid #1565C0; }
+.stat-card--orange { border-top: 3px solid #E65100; }
+.stat-card--purple { border-top: 3px solid #6A1B9A; }
+.stat-card__label { font-size: 0.78rem; color: var(--color-text-muted); font-weight: 500; }
+.stat-card__value { font-size: 1.3rem; font-weight: 700; }
+
+.kpi-row { display: flex; gap: 0.75rem; margin-bottom: 0.75rem; }
+.kpi { flex: 1; background: var(--color-surface); border-radius: var(--radius-md); padding: 1rem; text-align: center; box-shadow: var(--shadow-sm); }
+.kpi--alert { border: 2px solid var(--color-warning); }
+.kpi__value { display: block; font-size: 2rem; font-weight: 700; }
+.kpi__label { font-size: 0.8rem; color: var(--color-text-muted); }
+
+.shortcuts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; }
+.shortcut-btn {
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  padding: 1rem 0.5rem;
+  display: flex; flex-direction: column; align-items: center; gap: 0.3rem;
+  box-shadow: var(--shadow-sm);
+  transition: background .15s, transform .1s;
+  font-weight: 600; font-size: 0.82rem;
+}
+.shortcut-btn:hover { background: var(--color-primary-bg); }
+.shortcut-btn:active { transform: scale(.96); }
+.shortcut-btn__icon { font-size: 1.6rem; }
+
+/* ─── Listas de pedidos ──────────────────────────────────────── */
+.order-list { display: flex; flex-direction: column; gap: 0.5rem; }
+.order-row { background: var(--color-surface); border-radius: var(--radius-md); padding: 0.75rem 1rem; display: flex; align-items: center; gap: 0.75rem; box-shadow: var(--shadow-sm); }
+.order-row__num { font-weight: 700; font-size: 0.85rem; min-width: 7rem; }
+.order-row__client { flex: 1; }
+.order-row__right { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+.order-row__total { font-weight: 700; }
+.order-row__date { font-size: 0.8rem; color: var(--color-text-muted); }
+
+.orders-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 0.75rem; }
+.order-card { background: var(--color-surface); border-radius: var(--radius-md); padding: 1rem; box-shadow: var(--shadow-sm); cursor: pointer; transition: box-shadow .15s; }
+.order-card:hover { box-shadow: var(--shadow-md); }
+.order-card__top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem; }
+.order-card__num { font-weight: 700; font-size: 0.9rem; }
+.order-card__client { font-size: 0.95rem; margin-bottom: 0.5rem; }
+.order-card__footer { display: flex; justify-content: space-between; align-items: center; font-size: 0.82rem; color: var(--color-text-muted); }
+.order-card__total { font-weight: 700; color: var(--color-text); }
+
+/* ─── Clientes ───────────────────────────────────────────────── */
+.client-list { display: flex; flex-direction: column; gap: 0.5rem; }
+.client-card { background: var(--color-surface); border-radius: var(--radius-md); padding: 0.85rem 1rem; display: flex; align-items: center; gap: 0.75rem; box-shadow: var(--shadow-sm); cursor: pointer; transition: box-shadow .15s; }
+.client-card:hover { box-shadow: var(--shadow-md); }
+.client-card__avatar { width: 2.5rem; height: 2.5rem; border-radius: 50%; background: var(--color-primary); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; font-weight: 700; flex-shrink: 0; }
+.client-card__info { flex: 1; min-width: 0; }
+.client-card__name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.client-card__meta { font-size: 0.8rem; color: var(--color-text-muted); }
+.client-results { display: flex; flex-direction: column; gap: 0.4rem; max-height: 200px; overflow-y: auto; }
+.client-result-item { display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem; border-radius: var(--radius-sm); cursor: pointer; background: var(--color-bg); }
+.client-result-item:hover { background: var(--color-primary-bg); }
+.client-result-item__avatar { width: 2rem; height: 2rem; border-radius: 50%; background: var(--color-primary); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: 700; flex-shrink: 0; }
+.selected-client { background: var(--color-primary-bg); border-radius: var(--radius-md); padding: 0.75rem 1rem; display: flex; align-items: center; gap: 0.5rem; }
+.selected-client__icon { color: var(--color-primary); font-size: 1.2rem; }
+
+/* ─── Productos ──────────────────────────────────────────────── */
+.products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 0.75rem; }
+.product-card { background: var(--color-surface); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-sm); cursor: pointer; transition: transform .15s, box-shadow .15s; }
+.product-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.product-card--unavailable { opacity: 0.65; }
+.product-card__img-wrap { position: relative; aspect-ratio: 1; overflow: hidden; background: var(--color-bg); }
+.product-card__img-wrap img { width: 100%; height: 100%; object-fit: cover; }
+.product-card__badge { position: absolute; top: 0.4rem; right: 0.4rem; padding: 0.15rem 0.5rem; border-radius: 999px; font-size: 0.7rem; font-weight: 700; }
+.product-card__badge--out { background: var(--color-danger); color: #fff; }
+.product-card__body { padding: 0.65rem; }
+.product-card__category { font-size: 0.7rem; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: .04em; }
+.product-card__name { font-weight: 600; font-size: 0.9rem; margin: 0.2rem 0; }
+.product-card__price { font-weight: 700; color: var(--color-primary); font-size: 0.9rem; }
+.product-card__actions { padding: 0.4rem 0.65rem; border-top: 1px solid var(--color-border); }
+
+/* ─── Variantes y selector ───────────────────────────────────── */
+.variant-row { background: var(--color-bg); border-radius: var(--radius-md); padding: 0.75rem; margin-bottom: 0.5rem; }
+.variant-row__header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+.product-selector { display: flex; flex-direction: column; gap: 0.5rem; max-height: 220px; overflow-y: auto; }
+.product-selector-item { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; background: var(--color-bg); border-radius: var(--radius-sm); flex-wrap: wrap; }
+.variant-buttons { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+
+/* ─── Líneas de pedido ───────────────────────────────────────── */
+.line-row { display: flex; align-items: center; justify-content: space-between; padding: 0.5rem; border-radius: var(--radius-sm); background: var(--color-bg); margin-bottom: 0.3rem; }
+.line-row--total { background: var(--color-primary-bg); font-weight: 700; padding: 0.75rem; }
+.line-row__name { flex: 1; }
+.line-row__controls { display: flex; align-items: center; gap: 0.5rem; }
+.line-qty { padding: 0.35rem 0.5rem; border: 1.5px solid var(--color-border); border-radius: var(--radius-sm); font-size: 0.9rem; min-height: 36px; }
+
+/* ─── Asistente ──────────────────────────────────────────────── */
+.wizard__steps { display: flex; align-items: center; gap: 0; margin-bottom: 1.5rem; }
+.wizard__step { display: flex; align-items: center; gap: 0.4rem; font-size: 0.82rem; color: var(--color-text-muted); }
+.wizard__step--active { color: var(--color-primary); font-weight: 700; }
+.wizard__step--done  { color: var(--color-primary); }
+.wizard__step-num { width: 1.6rem; height: 1.6rem; border-radius: 50%; background: #ddd; color: #555; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; }
+.wizard__step--active .wizard__step-num { background: var(--color-primary); color: #fff; }
+.wizard__step--done .wizard__step-num { background: var(--color-primary); color: #fff; }
+.wizard__step-line { flex: 1; height: 2px; background: #ddd; min-width: 1rem; }
+.wizard__body { max-height: 55vh; overflow-y: auto; padding-right: 0.25rem; }
+.wizard__footer { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--color-border); }
+
+/* ─── Detalles de pedido ─────────────────────────────────────── */
+.order-detail__header { display: flex; gap: 0.75rem; align-items: center; margin-bottom: 0.5rem; }
+.order-detail__num { font-size: 1.1rem; font-weight: 700; }
+.order-detail__client, .order-detail__date { font-size: 0.9rem; margin-bottom: 0.3rem; color: var(--color-text-muted); }
+.order-detail__total { font-size: 1.1rem; font-weight: 700; margin-top: 0.5rem; text-align: right; }
+.order-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; margin-bottom: 0.5rem; }
+.order-table th { text-align: left; padding: 0.4rem 0.5rem; border-bottom: 1.5px solid var(--color-border); font-weight: 600; color: var(--color-text-muted); }
+.order-table td { padding: 0.5rem 0.5rem; border-bottom: 1px solid var(--color-border); }
+.status-selector { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.status-btn { flex: 1; min-width: 110px; }
+
+/* ─── Promociones ────────────────────────────────────────────── */
+.promo-card { background: var(--color-surface); border-radius: var(--radius-md); padding: 1rem; margin-bottom: 0.75rem; box-shadow: var(--shadow-sm); }
+.promo-card__header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem; flex-wrap: wrap; }
+.promo-card__header strong { flex: 1; }
+.promo-card__desc { font-size: 0.9rem; color: var(--color-text-muted); margin-bottom: 0.4rem; }
+.promo-card__meta { display: flex; gap: 1rem; font-size: 0.8rem; color: var(--color-text-muted); margin-bottom: 0.5rem; }
+.promo-card__actions { display: flex; gap: 0.5rem; }
+.product-checkboxes { display: flex; flex-direction: column; gap: 0.4rem; max-height: 180px; overflow-y: auto; }
+.checkbox-label { display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; cursor: pointer; padding: 0.3rem 0; }
+.checkbox-label input { width: 1.1rem; height: 1.1rem; accent-color: var(--color-primary); }
+
+/* ─── Estadísticas ───────────────────────────────────────────── */
+.stats-mini-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; margin: 0.75rem 0; }
+.stat-mini { background: var(--color-bg); border-radius: var(--radius-sm); padding: 0.6rem; text-align: center; }
+.stat-mini span { display: block; font-weight: 700; font-size: 1rem; }
+.stat-mini small { font-size: 0.75rem; color: var(--color-text-muted); }
+.stats-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+.stats-table th { text-align: left; padding: 0.5rem; border-bottom: 1.5px solid var(--color-border); font-weight: 600; color: var(--color-text-muted); background: var(--color-bg); }
+.stats-table td { padding: 0.5rem; border-bottom: 1px solid var(--color-border); }
+.bar-chart { width: 100%; height: 160px; }
+.chart-wrap { background: var(--color-surface); border-radius: var(--radius-md); padding: 1rem; box-shadow: var(--shadow-sm); }
+.cat-chart { display: flex; flex-direction: column; gap: 0.6rem; }
+.cat-bar { display: flex; align-items: center; gap: 0.5rem; font-size: 0.82rem; }
+.cat-bar__label { width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--color-text-muted); }
+.cat-bar__track { flex: 1; height: 10px; background: var(--color-bg); border-radius: 5px; overflow: hidden; }
+.cat-bar__fill { height: 100%; border-radius: 5px; transition: width .4s; }
+.cat-bar__pct { font-size: 0.78rem; color: var(--color-text-muted); white-space: nowrap; }
+.period-tabs, .status-tabs, .category-tabs { display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 0.3rem; margin-bottom: 1rem; padding-bottom: 0.25rem; }
+.tab { padding: 0.5rem 0.9rem; border-radius: 999px; background: var(--color-bg); font-size: 0.82rem; font-weight: 600; white-space: nowrap; transition: background .15s, color .15s; color: var(--color-text-muted); min-height: 36px; }
+.tab--active { background: var(--color-primary); color: #fff; }
+.tab:hover:not(.tab--active) { background: var(--color-primary-bg); color: var(--color-primary); }
+.custom-range { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; }
+
+/* ─── Configuración ──────────────────────────────────────────── */
+.settings-section { background: var(--color-surface); border-radius: var(--radius-lg); padding: 1.25rem; margin-bottom: 1rem; box-shadow: var(--shadow-sm); }
+.settings-section__title { font-size: 1rem; font-weight: 700; margin-bottom: 1rem; color: var(--color-primary); }
+.settings-notice { background: var(--color-warning-bg); border-left: 3px solid var(--color-warning); padding: 0.75rem 1rem; border-radius: var(--radius-sm); font-size: 0.88rem; color: var(--color-warning); margin-bottom: 1rem; }
+.settings-notice--warning { }
+.settings-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+.img-preview-wrap { margin-bottom: 0.5rem; }
+.img-preview { width: 80px; height: 80px; object-fit: cover; border-radius: var(--radius-md); border: 1.5px solid var(--color-border); background: var(--color-bg); }
+
+/* ─── Login ──────────────────────────────────────────────────── */
+.login-screen { min-height: 100dvh; display: flex; align-items: center; justify-content: center; padding: 1.5rem; background: var(--color-primary); }
+.login-card { background: #fff; border-radius: var(--radius-lg); padding: 2rem 1.5rem; width: 100%; max-width: 400px; box-shadow: var(--shadow-lg); }
+.login-logo { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem; }
+.login-logo__icon { width: 50px; height: 50px; background: var(--color-primary); color: #fff; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 900; flex-shrink: 0; }
+.login-logo__title { font-size: 1.3rem; font-weight: 800; color: var(--color-primary); }
+.login-logo__sub { font-size: 0.8rem; color: var(--color-text-muted); }
+.login-notice { background: var(--color-info-bg); color: var(--color-info); border-radius: var(--radius-sm); padding: 0.75rem; font-size: 0.88rem; margin-bottom: 1rem; }
+.login-form__error { color: var(--color-danger); background: var(--color-danger-bg); border-radius: var(--radius-sm); padding: 0.6rem; font-size: 0.88rem; margin-bottom: 0.75rem; }
+.login-security-note { font-size: 0.75rem; color: var(--color-text-muted); margin-top: 1rem; text-align: center; }
+
+/* ─── Modal ──────────────────────────────────────────────────── */
+.modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: none; align-items: flex-end; justify-content: center; z-index: 999; }
+.modal-backdrop--visible { display: flex; }
+@media (min-width: 480px) { .modal-backdrop { align-items: center; } }
+.modal {
+  background: #fff; border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  width: 100%; max-height: 92dvh;
+  display: flex; flex-direction: column;
+  box-shadow: var(--shadow-lg);
+  animation: slideUp .2s ease;
+}
+@media (min-width: 480px) {
+  .modal { border-radius: var(--radius-lg); max-width: 560px; }
+}
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: none; opacity: 1; } }
+.modal__header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.25rem; border-bottom: 1px solid var(--color-border); flex-shrink: 0; }
+.modal__title { font-size: 1rem; font-weight: 700; }
+.modal__close { font-size: 1.1rem; padding: 0.3rem 0.5rem; border-radius: var(--radius-sm); color: var(--color-text-muted); }
+.modal__close:hover { background: var(--color-bg); }
+.modal__body { padding: 1.25rem; overflow-y: auto; flex: 1; }
+.modal__footer { padding: 1rem 1.25rem; border-top: 1px solid var(--color-border); display: flex; gap: 0.75rem; justify-content: flex-end; flex-shrink: 0; }
+
+/* ─── Toast ──────────────────────────────────────────────────── */
+#vb-toast {
+  position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%) translateY(5rem);
+  background: #333; color: #fff; padding: 0.7rem 1.4rem;
+  border-radius: 999px; font-size: 0.9rem; font-weight: 500;
+  box-shadow: var(--shadow-md); z-index: 9999;
+  transition: transform .25s ease, opacity .25s;
+  opacity: 0; white-space: nowrap; max-width: 90vw; text-align: center;
+}
+.toast--visible { transform: translateX(-50%) translateY(0) !important; opacity: 1 !important; }
+.toast--success { background: var(--color-primary); }
+.toast--error   { background: var(--color-danger);  }
+.toast--warning { background: var(--color-warning); }
+
+/* ─── Spinner ────────────────────────────────────────────────── */
+.spinner-overlay { position: fixed; inset: 0; background: rgba(255,255,255,.7); display: none; align-items: center; justify-content: center; z-index: 9000; }
+.spinner-overlay--visible { display: flex; }
+.spinner__ring {
+  width: 42px; height: 42px; border: 4px solid var(--color-border);
+  border-top-color: var(--color-primary); border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-view { height: 60vh; display: flex; align-items: center; justify-content: center; }
+
+/* ─── Utilidades ─────────────────────────────────────────────── */
+.text-muted   { color: var(--color-text-muted); font-size: 0.88rem; }
+.text-green   { color: var(--color-primary); }
+.text-right   { text-align: right; }
+.empty-msg    { color: var(--color-text-muted); text-align: center; padding: 2rem 0; }
+.divider      { border: none; border-top: 1px solid var(--color-border); margin: 1rem 0; }
+.simple-list  { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.9rem; }
+.simple-list li { display: flex; justify-content: space-between; padding: 0.3rem 0; }
+.search-bar   { margin-bottom: 0.75rem; }
+.filter-bar   { margin-bottom: 0.75rem; }
+.review-total { font-size: 1.15rem; font-weight: 700; text-align: right; margin-top: 0.75rem; }
+
+/* ─── Cliente detalle ────────────────────────────────────────── */
+.client-detail__header { display: flex; gap: 0.75rem; align-items: center; margin-bottom: 1rem; }
+.client-detail__avatar { width: 56px; height: 56px; border-radius: 50%; background: var(--color-primary); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 700; flex-shrink: 0; }
+.client-detail__notes { background: var(--color-bg); border-radius: var(--radius-sm); padding: 0.6rem; font-size: 0.88rem; color: var(--color-text-muted); margin: 0.5rem 0 1rem; }
+
+/* ─── Errors ─────────────────────────────────────────────────── */
+.fatal-error { text-align: center; padding: 3rem; }
+.error-view  { padding: 1.5rem; color: var(--color-danger); }
+
+/* ─── Accesibilidad ──────────────────────────────────────────── */
+:focus-visible { outline: 3px solid var(--color-primary); outline-offset: 2px; }
+
+  </style>
 </head>
 <body>
-  <!-- Pantalla de carga inicial -->
   <div id="vb-root">
     <div style="min-height:100dvh;display:flex;align-items:center;justify-content:center;background:#2E7D32;">
       <div style="text-align:center;color:#fff;">
-        <div style="font-size:3rem;font-weight:900;letter-spacing:-1px;margin-bottom:.5rem;">V</div>
+        <div style="font-size:3rem;font-weight:900;margin-bottom:.5rem;">V</div>
         <div style="font-size:1.1rem;font-weight:600;opacity:.85;">Cargando VeritosBusiness…</div>
         <div style="margin-top:1.5rem;width:40px;height:40px;border:4px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;margin-inline:auto;"></div>
       </div>
     </div>
   </div>
-
   <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+  <script>
 
-  <!-- Módulo principal -->
-  <script type="module" src="./js/app.js"></script>
+// ═══ db.js ═══
+/**
+ * db.js — Capa de persistencia IndexedDB para VeritosBusiness
+ * Usa la API nativa IndexedDB (sin librerías externas)
+ */
 
-  <!-- Fallback: navegadores sin soporte ES modules -->
-  <script nomodule>
-    document.getElementById('vb-root').innerHTML =
-      '<div style="text-align:center;padding:3rem;font-family:sans-serif">' +
-      '<h1>Navegador no compatible</h1>' +
-      '<p>VeritosBusiness requiere un navegador moderno (Chrome 80+, Firefox 75+, Safari 14+).</p>' +
-      '</div>';
+const DB_NAME = 'VeritosBusiness';
+const DB_VERSION = 1;
+
+let _db = null;
+
+const STORES = {
+  settings:   { keyPath: 'key' },
+  clients:    { keyPath: 'id', autoIncrement: true },
+  products:   { keyPath: 'id', autoIncrement: true },
+  orders:     { keyPath: 'id', autoIncrement: true },
+  promotions: { keyPath: 'id', autoIncrement: true },
+};
+
+function openDB() {
+  if (_db) return Promise.resolve(_db);
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      for (const [name, opts] of Object.entries(STORES)) {
+        if (!db.objectStoreNames.contains(name)) {
+          const store = db.createObjectStore(name, { keyPath: opts.keyPath, autoIncrement: !!opts.autoIncrement });
+          if (name === 'clients') {
+            store.createIndex('phone', 'phone', { unique: false });
+            store.createIndex('name', 'name', { unique: false });
+          }
+          if (name === 'orders') {
+            store.createIndex('clientId', 'clientId', { unique: false });
+            store.createIndex('status', 'status', { unique: false });
+            store.createIndex('createdAt', 'createdAt', { unique: false });
+            store.createIndex('orderNumber', 'orderNumber', { unique: true });
+          }
+          if (name === 'promotions') {
+            store.createIndex('active', 'active', { unique: false });
+          }
+        }
+      }
+    };
+    req.onsuccess = (e) => { _db = e.target.result; resolve(_db); };
+    req.onerror = (e) => reject(e.target.error);
+  });
+}
+
+function tx(storeName, mode = 'readonly') {
+  return _db.transaction(storeName, mode).objectStore(storeName);
+}
+
+function req2promise(r) {
+  return new Promise((res, rej) => {
+    r.onsuccess = () => res(r.result);
+    r.onerror = () => rej(r.error);
+  });
+}
+
+// ─── Genéricos ────────────────────────────────────────────────────────────────
+
+async function getAll(storeName) {
+  await openDB();
+  return req2promise(tx(storeName).getAll());
+}
+
+async function getById(storeName, id) {
+  await openDB();
+  return req2promise(tx(storeName).get(id));
+}
+
+async function put(storeName, record) {
+  await openDB();
+  return req2promise(tx(storeName, 'readwrite').put(record));
+}
+
+async function remove(storeName, id) {
+  await openDB();
+  return req2promise(tx(storeName, 'readwrite').delete(id));
+}
+
+async function clear(storeName) {
+  await openDB();
+  return req2promise(tx(storeName, 'readwrite').clear());
+}
+
+// ─── Settings ─────────────────────────────────────────────────────────────────
+
+async function getSetting(key, defaultValue = null) {
+  await openDB();
+  const r = await req2promise(tx('settings').get(key));
+  return r ? r.value : defaultValue;
+}
+
+async function setSetting(key, value) {
+  await openDB();
+  return req2promise(tx('settings', 'readwrite').put({ key, value }));
+}
+
+// ─── Clientes ─────────────────────────────────────────────────────────────────
+
+async function getAllClients() {
+  return getAll('clients');
+}
+
+async function getClientById(id) {
+  return getById('clients', id);
+}
+
+async function saveClient(client) {
+  if (!client.createdAt) client.createdAt = new Date().toISOString();
+  client.updatedAt = new Date().toISOString();
+  return put('clients', client);
+}
+
+async function deleteClient(id) {
+  return remove('clients', id);
+}
+
+async function findClientByPhone(phone) {
+  await openDB();
+  return new Promise((res, rej) => {
+    const all = [];
+    const r = tx('clients').openCursor();
+    r.onsuccess = (e) => {
+      const cursor = e.target.result;
+      if (cursor) {
+        if (cursor.value.phone === phone) all.push(cursor.value);
+        cursor.continue();
+      } else { res(all); }
+    };
+    r.onerror = () => rej(r.error);
+  });
+}
+
+// ─── Productos ────────────────────────────────────────────────────────────────
+
+async function getAllProducts() {
+  return getAll('products');
+}
+
+async function getProductById(id) {
+  return getById('products', id);
+}
+
+async function saveProduct(product) {
+  if (!product.createdAt) product.createdAt = new Date().toISOString();
+  product.updatedAt = new Date().toISOString();
+  return put('products', product);
+}
+
+async function deleteProduct(id) {
+  return remove('products', id);
+}
+
+// ─── Pedidos ──────────────────────────────────────────────────────────────────
+
+async function getAllOrders() {
+  return getAll('orders');
+}
+
+async function getOrderById(id) {
+  return getById('orders', id);
+}
+
+async function getOrdersByClient(clientId) {
+  await openDB();
+  return new Promise((res, rej) => {
+    const all = [];
+    const r = tx('orders').index('clientId').openCursor(IDBKeyRange.only(clientId));
+    r.onsuccess = (e) => {
+      const cursor = e.target.result;
+      if (cursor) { all.push(cursor.value); cursor.continue(); }
+      else res(all);
+    };
+    r.onerror = () => rej(r.error);
+  });
+}
+
+async function getNextOrderNumber() {
+  const orders = await getAllOrders();
+  if (orders.length === 0) return 'PED-000001';
+  const nums = orders.map(o => parseInt(o.orderNumber?.replace('PED-', '') || '0'));
+  const max = Math.max(...nums);
+  return `PED-${String(max + 1).padStart(6, '0')}`;
+}
+
+async function saveOrder(order) {
+  if (!order.createdAt) order.createdAt = new Date().toISOString();
+  order.updatedAt = new Date().toISOString();
+  return put('orders', order);
+}
+
+async function deleteOrder(id) {
+  return remove('orders', id);
+}
+
+// ─── Promociones ──────────────────────────────────────────────────────────────
+
+async function getAllPromotions() {
+  return getAll('promotions');
+}
+
+async function getPromotionById(id) {
+  return getById('promotions', id);
+}
+
+async function savePromotion(promo) {
+  if (!promo.createdAt) promo.createdAt = new Date().toISOString();
+  promo.updatedAt = new Date().toISOString();
+  return put('promotions', promo);
+}
+
+async function deletePromotion(id) {
+  return remove('promotions', id);
+}
+
+// ─── Backup ───────────────────────────────────────────────────────────────────
+
+async function exportBackup() {
+  await openDB();
+  const [clients, products, orders, promotions] = await Promise.all([
+    getAllClients(), getAllProducts(), getAllOrders(), getAllPromotions()
+  ]);
+  const settings = {};
+  await new Promise((res, rej) => {
+    const r = tx('settings').openCursor();
+    r.onsuccess = (e) => {
+      const c = e.target.result;
+      if (c) { settings[c.value.key] = c.value.value; c.continue(); }
+      else res();
+    };
+    r.onerror = () => rej(r.error);
+  });
+  return {
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    settings, clients, products, orders, promotions
+  };
+}
+
+async function importBackup(data) {
+  if (!data || data.version !== 1) throw new Error('Formato de copia de seguridad no válido');
+  await openDB();
+  // Importar en orden: settings → products → clients → promotions → orders
+  const stores = ['settings', 'clients', 'products', 'orders', 'promotions'];
+  for (const s of stores) await clear(s);
+
+  if (data.settings) {
+    for (const [key, value] of Object.entries(data.settings)) {
+      await setSetting(key, value);
+    }
+  }
+  for (const rec of (data.clients || []))    await put('clients', rec);
+  for (const rec of (data.products || []))   await put('products', rec);
+  for (const rec of (data.orders || []))     await put('orders', rec);
+  for (const rec of (data.promotions || [])) await put('promotions', rec);
+}
+
+
+// ═══ auth.js ═══
+/**
+ * auth.js — Autenticación local para VeritosBusiness
+ *
+ * ADVERTENCIA DE SEGURIDAD: Esta autenticación es local y basada en el
+ * dispositivo. No protege frente a ataques técnicos si alguien accede
+ * a los datos del navegador. La seguridad real depende del bloqueo del
+ * teléfono Android. No uses esta contraseña para cuentas externas.
+ */
+
+const SESSION_KEY = 'vb_session';
+const HASH_ALGO   = 'SHA-256';
+
+async function sha256(str) {
+  const buf = await crypto.subtle.digest(HASH_ALGO, new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function isFirstRun() {
+  const hash = await getSetting('auth_hash');
+  return !hash;
+}
+
+async function setupCredentials(username, password) {
+  if (!username || !password || password.length < 4) {
+    throw new Error('El usuario y la contraseña (mínimo 4 caracteres) son obligatorios');
+  }
+  const hash = await sha256(username.toLowerCase().trim() + ':' + password);
+  await setSetting('auth_hash', hash);
+  await setSetting('auth_user', username.trim());
+  _startSession(username.trim());
+}
+
+async function login(username, password) {
+  const storedHash = await getSetting('auth_hash');
+  if (!storedHash) throw new Error('No hay credenciales configuradas');
+  const hash = await sha256(username.toLowerCase().trim() + ':' + password);
+  if (hash !== storedHash) throw new Error('Usuario o contraseña incorrectos');
+  _startSession(username.trim());
+  return true;
+}
+
+async function changePassword(currentPassword, newPassword) {
+  const user = await getSetting('auth_user');
+  const storedHash = await getSetting('auth_hash');
+  const currentHash = await sha256(user.toLowerCase() + ':' + currentPassword);
+  if (currentHash !== storedHash) throw new Error('Contraseña actual incorrecta');
+  if (!newPassword || newPassword.length < 4) throw new Error('La nueva contraseña debe tener al menos 4 caracteres');
+  const newHash = await sha256(user.toLowerCase() + ':' + newPassword);
+  await setSetting('auth_hash', newHash);
+}
+
+function _startSession(username) {
+  try {
+    sessionStorage.setItem(SESSION_KEY, JSON.stringify({ username, at: Date.now() }));
+    localStorage.setItem(SESSION_KEY, JSON.stringify({ username, at: Date.now() }));
+  } catch {}
+}
+
+function isLoggedIn() {
+  try {
+    const s = localStorage.getItem(SESSION_KEY);
+    if (!s) return false;
+    const { at } = JSON.parse(s);
+    // Sesión válida durante 90 días de inactividad
+    return (Date.now() - at) < 90 * 24 * 60 * 60 * 1000;
+  } catch { return false; }
+}
+
+function getSessionUser() {
+  try {
+    const s = localStorage.getItem(SESSION_KEY);
+    return s ? JSON.parse(s).username : null;
+  } catch { return null; }
+}
+
+function logout() {
+  try {
+    localStorage.removeItem(SESSION_KEY);
+    sessionStorage.removeItem(SESSION_KEY);
+  } catch {}
+}
+
+
+// ═══ prices.js ═══
+/**
+ * prices.js — Lógica de precios y aplicación de promociones
+ */
+
+/**
+ * Devuelve las promociones activas en este momento
+ */
+function getActivePromotions(allPromotions) {
+  const now = new Date();
+  return allPromotions.filter(p => {
+    if (!p.enabled) return false;
+    if (p.startDate && new Date(p.startDate) > now) return false;
+    if (p.endDate   && new Date(p.endDate)   < now) return false;
+    return true;
+  });
+}
+
+/**
+ * Calcula el precio final de una variante dado un contexto de promociones.
+ * No acumula descuentos por defecto; aplica el más favorable.
+ *
+ * @param {object} variant  — { price, productId, variantId? }
+ * @param {number} qty      — cantidad pedida
+ * @param {array}  activePromos — promociones ya filtradas como activas
+ * @returns { unitPrice, totalPrice, discountAmount, promoApplied }
+ */
+function calcLinePrice(variant, qty, activePromos) {
+  const basePrice = Number(variant.price) || 0;
+
+  let bestDiscount = 0;
+  let bestPromo = null;
+
+  for (const p of activePromos) {
+    // Comprobar si esta promo aplica a este producto/variante
+    if (!promoAppliesToVariant(p, variant)) continue;
+
+    let discount = 0;
+
+    if (p.type === 'percent') {
+      // Descuento porcentual sobre el precio unitario
+      discount = basePrice * qty * (Number(p.value) / 100);
+    } else if (p.type === 'fixed') {
+      // Descuento fijo por unidad
+      discount = Number(p.value) * qty;
+    } else if (p.type === 'bundle') {
+      // Oferta por cantidad: X unidades a precio especial
+      // p.bundleQty = unidades del pack, p.bundlePrice = precio del pack
+      const packs = Math.floor(qty / Number(p.bundleQty));
+      const rest  = qty % Number(p.bundleQty);
+      const normalTotal = basePrice * qty;
+      const promoTotal  = packs * Number(p.bundlePrice) + rest * basePrice;
+      discount = normalTotal - promoTotal;
+    }
+
+    if (discount > bestDiscount) {
+      bestDiscount = discount;
+      bestPromo = p;
+    }
+  }
+
+  const totalPrice = Math.max(0, basePrice * qty - bestDiscount);
+
+  return {
+    unitPrice:      basePrice,
+    totalPrice:     round2(totalPrice),
+    discountAmount: round2(bestDiscount),
+    promoApplied:   bestPromo ? bestPromo.name : null,
+    promoId:        bestPromo ? bestPromo.id   : null,
+  };
+}
+
+function promoAppliesToVariant(promo, variant) {
+  // Si no tiene restricciones de producto, aplica a todos
+  if (!promo.productIds || promo.productIds.length === 0) return true;
+  if (!promo.productIds.includes(variant.productId)) return false;
+  // Si hay restricción de variante concreta
+  if (promo.variantIds && promo.variantIds.length > 0) {
+    return promo.variantIds.includes(variant.variantId || variant.id);
+  }
+  return true;
+}
+
+function round2(n) {
+  return Math.round((n + Number.EPSILON) * 100) / 100;
+}
+
+/**
+ * Calcula el total de un pedido a partir de sus líneas (ya calculadas)
+ */
+function calcOrderTotal(lines) {
+  let subtotal = 0, discount = 0;
+  for (const l of lines) {
+    subtotal += (l.unitPrice || 0) * (l.qty || 0);
+    discount += l.discountAmount || 0;
+  }
+  return {
+    subtotal:  round2(subtotal),
+    discount:  round2(discount),
+    total:     round2(subtotal - discount),
+  };
+}
+
+/**
+ * Calcula el beneficio bruto de una línea
+ */
+function calcLineMargin(line) {
+  const cost = (Number(line.costPrice) || 0) * (line.qty || 0);
+  return round2((line.totalPrice || 0) - cost);
+}
+
+
+// ═══ whatsapp.js ═══
+/**
+ * whatsapp.js — Generación de mensajes y apertura de WhatsApp
+ * El envío siempre es manual por parte de la vendedora o el cliente.
+ */
+
+/**
+ * Abre WhatsApp con un mensaje predefinido.
+ * @param {string} phone   — número internacional sin + ni espacios, ej: 34600123456
+ * @param {string} message — texto del mensaje
+ */
+function openWhatsApp(phone, message) {
+  const encoded = encodeURIComponent(message);
+  const url = `https://wa.me/${phone}?text=${encoded}`;
+  window.open(url, '_blank');
+}
+
+/**
+ * Genera el mensaje de cambio de estado de un pedido.
+ */
+function orderStatusMessage(order, clientName, storeName, status) {
+  const msgs = {
+    'confirmed':  `Hola ${clientName} 👋 Tu pedido *${order.orderNumber}* ha sido confirmado. ¡Gracias por tu compra en ${storeName}!`,
+    'preparing':  `Hola ${clientName} 👋 Tu pedido *${order.orderNumber}* está siendo preparado. Te avisamos cuando esté listo.`,
+    'ready':      `Hola ${clientName} ✅ Tu pedido *${order.orderNumber}* ya está listo para recoger. ¡Te esperamos!`,
+    'delivered':  `Hola ${clientName} 🎉 ¡Tu pedido *${order.orderNumber}* ha sido entregado! Esperamos que lo disfrutes. Gracias por confiar en ${storeName} 💚`,
+    'cancelled':  `Hola ${clientName} ℹ️ Tu pedido *${order.orderNumber}* ha sido cancelado. Si tienes alguna duda, escríbenos por aquí.`,
+  };
+  return msgs[status] || `Hola ${clientName}, hay una actualización en tu pedido ${order.orderNumber}.`;
+}
+
+/**
+ * Genera el mensaje completo de un pedido recibido desde el catálogo público.
+ * Lo usa la vendedora para confirmar al cliente si quiere.
+ */
+function orderSummaryMessage(order, clientName, storeName) {
+  let lines = [`🛒 *Resumen del pedido ${order.orderNumber}*`, `📅 ${formatDate(order.createdAt)}`, ``];
+  lines.push(`👤 Cliente: ${clientName}`);
+  lines.push(``);
+  lines.push(`📦 *Productos:*`);
+  for (const l of (order.lines || [])) {
+    let line = `• ${l.productName}`;
+    if (l.variantName) line += ` (${l.variantName})`;
+    line += ` x${l.qty} — ${formatPrice(l.totalPrice)}`;
+    if (l.discountAmount > 0) line += ` _(descuento: -${formatPrice(l.discountAmount)})_`;
+    lines.push(line);
+  }
+  lines.push(``);
+  if (order.discount > 0) lines.push(`💸 Descuento total: -${formatPrice(order.discount)}`);
+  lines.push(`💰 *Total: ${formatPrice(order.total)}*`);
+  lines.push(``);
+  lines.push(`Pago en efectivo al recoger. ¡Gracias! 💚`);
+  return lines.join('\n');
+}
+
+function formatPrice(n) {
+  return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(n || 0);
+}
+
+function formatDate(iso) {
+  return new Date(iso).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+
+
+// ═══ backup.js ═══
+/**
+ * backup.js — Exportar e importar copias de seguridad en formato JSON
+ */
+
+/**
+ * Descarga una copia de seguridad completa al dispositivo.
+ */
+async function downloadBackup() {
+  const data = await exportBackup();
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const date = new Date().toISOString().slice(0, 10);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `veritosbusiness-backup-${date}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  return data;
+}
+
+/**
+ * Importa una copia de seguridad desde un File seleccionado.
+ * Muestra un aviso antes de sobrescribir.
+ * @param {File} file
+ */
+async function restoreBackup(file) {
+  if (!file) throw new Error('No se ha seleccionado ningún archivo');
+  const text = await file.text();
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch {
+    throw new Error('El archivo no es un JSON válido');
+  }
+  validateBackup(data);
+  return data; // Devuelve para que la UI confirme antes de importar
+}
+
+async function applyRestore(data) {
+  validateBackup(data);
+  await importBackup(data);
+}
+
+function validateBackup(data) {
+  if (!data || typeof data !== 'object') throw new Error('Formato inválido');
+  if (data.version !== 1) throw new Error(`Versión de backup no compatible: ${data.version}`);
+  if (!data.exportedAt)   throw new Error('El backup no tiene fecha de exportación');
+  const required = ['clients', 'products', 'orders', 'promotions'];
+  for (const k of required) {
+    if (!Array.isArray(data[k])) throw new Error(`El backup no contiene el campo "${k}"`);
+  }
+}
+
+/**
+ * Exporta el catálogo público (sin datos privados) en formato catalog.json
+ * Este archivo es el que se publica en el repositorio de Mi catálogo Herbalife.
+ */
+async function exportPublicCatalog(products, promotions, settings) {
+  const activePromos = promotions.filter(p => {
+    if (!p.enabled) return false;
+    const now = new Date();
+    if (p.startDate && new Date(p.startDate) > now) return false;
+    if (p.endDate   && new Date(p.endDate)   < now) return false;
+    return true;
+  });
+
+  const catalog = {
+    version:     1,
+    exportedAt:  new Date().toISOString(),
+    store: {
+      name:        settings.storeName   || '',
+      description: settings.storeDesc  || '',
+      whatsapp:    settings.whatsapp    || '',
+      schedule:    settings.schedule   || '',
+      location:    settings.location   || '',
+      logo:        settings.logo        || '',
+    },
+    categories: [
+      'Nutrición y batidos',
+      'Bebidas y aloe',
+      'Barritas y snacks',
+      'Cuidado personal',
+      'Nutrición deportiva',
+    ],
+    products: products
+      .filter(p => !p.deleted)
+      .map(p => ({
+        id:          p.id,
+        name:        p.name,
+        description: p.description || '',
+        category:    p.category,
+        image:       p.image || null,
+        available:   p.available !== false,
+        variants: (p.variants || []).map(v => ({
+          id:        v.id,
+          name:      v.name,
+          flavor:    v.flavor || '',
+          format:    v.format || '',
+          price:     v.price,
+          available: v.available !== false,
+          // ⚠️ NUNCA incluir costPrice
+        })),
+      })),
+    promotions: activePromos.map(p => ({
+      id:          p.id,
+      name:        p.name,
+      type:        p.type,
+      value:       p.type !== 'bundle' ? p.value : undefined,
+      bundleQty:   p.type === 'bundle' ? p.bundleQty   : undefined,
+      bundlePrice: p.type === 'bundle' ? p.bundlePrice : undefined,
+      productIds:  p.productIds  || [],
+      variantIds:  p.variantIds  || [],
+      description: p.description || '',
+    })),
+  };
+
+  const json = JSON.stringify(catalog, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = 'catalog.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  return catalog;
+}
+
+
+// ═══ ui.js ═══
+/**
+ * ui.js — Componentes y funciones de interfaz reutilizables
+ */
+
+// ─── Toast (notificaciones) ───────────────────────────────────────────────────
+
+let _toastTimer = null;
+function toast(message, type = 'info', duration = 3000) {
+  let el = document.getElementById('vb-toast');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'vb-toast';
+    document.body.appendChild(el);
+  }
+  el.textContent = message;
+  el.className   = `toast toast--${type} toast--visible`;
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => el.classList.remove('toast--visible'), duration);
+}
+
+// ─── Modal ────────────────────────────────────────────────────────────────────
+
+function showModal({ title, content, actions = [] }) {
+  let backdrop = document.getElementById('vb-modal-backdrop');
+  if (!backdrop) {
+    backdrop = document.createElement('div');
+    backdrop.id = 'vb-modal-backdrop';
+    backdrop.className = 'modal-backdrop';
+    document.body.appendChild(backdrop);
+  }
+  backdrop.innerHTML = `
+    <div class="modal" role="dialog" aria-modal="true">
+      <div class="modal__header">
+        <h2 class="modal__title">${title}</h2>
+        <button class="modal__close" aria-label="Cerrar">✕</button>
+      </div>
+      <div class="modal__body">${typeof content === 'string' ? content : ''}</div>
+      <div class="modal__footer">
+        ${actions.map((a, i) =>
+          `<button class="btn ${a.class || 'btn--secondary'}" data-action="${i}">${a.label}</button>`
+        ).join('')}
+      </div>
+    </div>`;
+  backdrop.classList.add('modal-backdrop--visible');
+  if (typeof content !== 'string') {
+    backdrop.querySelector('.modal__body').appendChild(content);
+  }
+  backdrop.querySelector('.modal__close').addEventListener('click', closeModal);
+  backdrop.addEventListener('click', (e) => { if (e.target === backdrop) closeModal(); });
+  actions.forEach((a, i) => {
+    backdrop.querySelector(`[data-action="${i}"]`)?.addEventListener('click', () => {
+      if (a.callback) a.callback();
+      if (a.close !== false) closeModal();
+    });
+  });
+  return backdrop;
+}
+
+function closeModal() {
+  const b = document.getElementById('vb-modal-backdrop');
+  if (b) b.classList.remove('modal-backdrop--visible');
+}
+
+// ─── Confirmación ─────────────────────────────────────────────────────────────
+
+function confirm(message, { confirmLabel = 'Confirmar', cancelLabel = 'Cancelar', danger = false } = {}) {
+  return new Promise(resolve => {
+    showModal({
+      title: '¿Estás segura?',
+      content: `<p>${message}</p>`,
+      actions: [
+        { label: cancelLabel,  class: 'btn btn--secondary', callback: () => resolve(false) },
+        { label: confirmLabel, class: `btn ${danger ? 'btn--danger' : 'btn--primary'}`, callback: () => resolve(true) },
+      ]
+    });
+  });
+}
+
+// ─── Spinner ──────────────────────────────────────────────────────────────────
+
+function showSpinner() {
+  let el = document.getElementById('vb-spinner');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'vb-spinner';
+    el.innerHTML = '<div class="spinner__ring"></div>';
+    el.className = 'spinner-overlay';
+    document.body.appendChild(el);
+  }
+  el.classList.add('spinner-overlay--visible');
+}
+function hideSpinner() {
+  document.getElementById('vb-spinner')?.classList.remove('spinner-overlay--visible');
+}
+
+// ─── Helpers de formato ───────────────────────────────────────────────────────
+
+function formatPrice(n) {
+  return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(Number(n) || 0);
+}
+
+function formatDate(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+
+function formatDateTime(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
+function relativeTime(iso) {
+  if (!iso) return '';
+  const diff = Date.now() - new Date(iso).getTime();
+  const days = Math.floor(diff / 86400000);
+  if (days === 0) return 'hoy';
+  if (days === 1) return 'ayer';
+  if (days < 7)  return `hace ${days} días`;
+  if (days < 30) return `hace ${Math.floor(days/7)} sem.`;
+  if (days < 365) return `hace ${Math.floor(days/30)} mes.`;
+  return `hace ${Math.floor(days/365)} año/s`;
+}
+
+// ─── Clasificación de clientes ────────────────────────────────────────────────
+
+function clientCategory(client, orders, vipSettings = {}) {
+  const clientOrders = orders.filter(o => o.clientId === client.id && o.status === 'delivered');
+  if (clientOrders.length === 0) return 'NUEVO';
+  const lastDate  = new Date(Math.max(...clientOrders.map(o => new Date(o.createdAt))));
+  const daysSince = (Date.now() - lastDate.getTime()) / 86400000;
+  if (daysSince > 90) return 'INACTIVO';
+  const totalSpent  = clientOrders.reduce((s, o) => s + (o.total || 0), 0);
+  const orderCount  = clientOrders.length;
+  const vipSpend    = Number(vipSettings.minSpend)  || 300;
+  const vipOrders   = Number(vipSettings.minOrders) || 10;
+  if (totalSpent >= vipSpend || orderCount >= vipOrders) return 'VIP';
+  if (orderCount >= 2) return 'HABITUAL';
+  return 'NUEVO';
+}
+
+const CATEGORY_COLORS = {
+  'NUEVO':    { bg: '#E3F2FD', text: '#1565C0' },
+  'HABITUAL': { bg: '#E8F5E9', text: '#2E7D32' },
+  'INACTIVO': { bg: '#FFF3E0', text: '#E65100' },
+  'VIP':      { bg: '#F3E5F5', text: '#6A1B9A' },
+};
+
+const ORDER_STATUS = {
+  'pending':   { label: 'Pendiente',         color: '#FFF3E0', text: '#E65100' },
+  'confirmed': { label: 'Confirmado',        color: '#E3F2FD', text: '#1565C0' },
+  'preparing': { label: 'Preparando',        color: '#EDE7F6', text: '#4527A0' },
+  'ready':     { label: 'Listo para recoger',color: '#E8F5E9', text: '#1B5E20' },
+  'delivered': { label: 'Entregado',         color: '#F1F8E9', text: '#33691E' },
+  'cancelled': { label: 'Cancelado',         color: '#FFEBEE', text: '#B71C1C' },
+};
+
+const PENDING_STATUSES = ['pending', 'confirmed', 'preparing', 'ready'];
+
+// ─── Chip de estado ───────────────────────────────────────────────────────────
+
+function statusChip(status) {
+  const s = ORDER_STATUS[status] || { label: status, color: '#eee', text: '#333' };
+  return `<span class="chip" style="background:${s.color};color:${s.text}">${s.label}</span>`;
+}
+
+function categoryChip(cat) {
+  const c = CATEGORY_COLORS[cat] || { bg: '#eee', text: '#333' };
+  return `<span class="chip" style="background:${c.bg};color:${c.text}">${cat}</span>`;
+}
+
+// ─── Render de tarjeta de producto ───────────────────────────────────────────
+
+function productCard(product, { onClick, onEdit } = {}) {
+  const img     = product.image || './assets/placeholder.png';
+  const avail   = product.available !== false;
+  const hasVars = product.variants?.length > 0;
+  const minPrice = hasVars
+    ? Math.min(...product.variants.map(v => Number(v.price) || 0))
+    : Number(product.price) || 0;
+
+  const card = document.createElement('div');
+  card.className = `product-card ${avail ? '' : 'product-card--unavailable'}`;
+  card.innerHTML = `
+    <div class="product-card__img-wrap">
+      <img src="${img}" alt="${product.name}" loading="lazy" onerror="this.src='./assets/placeholder.png'">
+      ${!avail ? '<span class="product-card__badge product-card__badge--out">Agotado</span>' : ''}
+    </div>
+    <div class="product-card__body">
+      <p class="product-card__category">${product.category || ''}</p>
+      <h3 class="product-card__name">${product.name}</h3>
+      <p class="product-card__price">${hasVars ? 'Desde ' : ''}${formatPrice(minPrice)}</p>
+    </div>
+    <div class="product-card__actions">
+      ${onEdit ? '<button class="btn btn--sm btn--secondary product-card__edit">Editar</button>' : ''}
+    </div>`;
+
+  if (onClick) card.addEventListener('click', (e) => {
+    if (!e.target.classList.contains('product-card__edit')) onClick(product);
+  });
+  if (onEdit) card.querySelector('.product-card__edit')?.addEventListener('click', (e) => {
+    e.stopPropagation(); onEdit(product);
+  });
+  return card;
+}
+
+// ─── Escape HTML ──────────────────────────────────────────────────────────────
+
+function esc(str) {
+  return String(str ?? '').replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  })[c]);
+}
+
+// ─── Generar UUID simple ──────────────────────────────────────────────────────
+
+function uid() {
+  return crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2);
+}
+
+
+// ═══ dashboard.js ═══
+/**
+ * dashboard.js — Panel principal de VeritosBusiness
+ */
+
+async function renderDashboard(container) {
+  const [orders, clients, storeName] = await Promise.all([
+    getAllOrders(),
+    getAllClients(),
+    getSetting('storeName', 'VeritosBusiness'),
+  ]);
+
+  const now       = new Date();
+  const thisMonth = orders.filter(o => {
+    const d = new Date(o.createdAt);
+    return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth()
+      && o.status === 'delivered';
+  });
+
+  const billing = thisMonth.reduce((s, o) => s + (o.total || 0), 0);
+  const cost    = thisMonth.reduce((s, o) => s + (o.costTotal || 0), 0);
+  const profit  = billing - cost;
+
+  const pending = orders.filter(o => PENDING_STATUSES.includes(o.status));
+  const recent  = [...orders].sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0,5);
+
+  container.innerHTML = `
+    <div class="dashboard">
+      <div class="dashboard__greeting">
+        <h2>Hola, ${storeName} 👋</h2>
+        <p class="text-muted">${formatMonthYear(now)}</p>
+      </div>
+
+      <!-- Resumen económico -->
+      <section class="section">
+        <h3 class="section__title">Este mes</h3>
+        <div class="stats-grid">
+          <div class="stat-card stat-card--blue">
+            <span class="stat-card__label">Facturación</span>
+            <span class="stat-card__value">${formatPrice(billing)}</span>
+          </div>
+          <div class="stat-card stat-card--orange">
+            <span class="stat-card__label">Coste mercancía</span>
+            <span class="stat-card__value">${formatPrice(cost)}</span>
+          </div>
+          <div class="stat-card stat-card--green">
+            <span class="stat-card__label">Beneficio</span>
+            <span class="stat-card__value">${formatPrice(profit)}</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Indicadores -->
+      <section class="section">
+        <div class="kpi-row">
+          <div class="kpi ${pending.length > 0 ? 'kpi--alert' : ''}">
+            <span class="kpi__value">${pending.length}</span>
+            <span class="kpi__label">Pedidos pendientes</span>
+          </div>
+          <div class="kpi">
+            <span class="kpi__value">${clients.length}</span>
+            <span class="kpi__label">Clientes</span>
+          </div>
+        </div>
+        ${pending.length > 0 ? `
+          <div class="alert alert--warning" id="pending-alert">
+            <strong>⚠️ Tienes ${pending.length} pedido${pending.length > 1 ? 's' : ''} sin entregar</strong>
+            <button class="btn btn--sm btn--primary" id="btn-view-pending">Ver pedidos</button>
+          </div>` : ''}
+      </section>
+
+      <!-- Accesos directos -->
+      <section class="section">
+        <h3 class="section__title">Accesos rápidos</h3>
+        <div class="shortcuts-grid">
+          ${shortcut('orders',     '📦', 'Pedidos')}
+          ${shortcut('clients',    '👤', 'Clientes')}
+          ${shortcut('products',   '🌿', 'Productos')}
+          ${shortcut('promotions', '🏷️',  'Promociones')}
+          ${shortcut('stats',      '📊', 'Estadísticas')}
+          ${shortcut('settings',   '⚙️',  'Configuración')}
+        </div>
+      </section>
+
+      <!-- Pedidos recientes -->
+      <section class="section">
+        <div class="section__header">
+          <h3 class="section__title">Pedidos recientes</h3>
+          <button class="btn btn--sm btn--ghost" data-nav="orders">Ver todos</button>
+        </div>
+        ${recent.length === 0
+          ? `<p class="empty-msg">No hay pedidos aún. <button class="btn btn--sm btn--primary" data-nav="orders">Crear el primero</button></p>`
+          : `<div class="order-list">${recent.map(orderRow).join('')}</div>`}
+      </section>
+    </div>`;
+
+  // Eventos
+  container.querySelectorAll('[data-nav]').forEach(btn => {
+    btn.addEventListener('click', () => navigate(btn.dataset.nav));
+  });
+  container.querySelectorAll('.shortcut-btn').forEach(btn => {
+    btn.addEventListener('click', () => navigate(btn.dataset.view));
+  });
+  container.getElementById?.('btn-view-pending')?.addEventListener('click', () => navigate('orders'));
+  document.getElementById('btn-view-pending')?.addEventListener('click', () => navigate('orders'));
+}
+
+function shortcut(view, icon, label) {
+  return `<button class="shortcut-btn" data-view="${view}">
+    <span class="shortcut-btn__icon">${icon}</span>
+    <span class="shortcut-btn__label">${label}</span>
+  </button>`;
+}
+
+function orderRow(order) {
+  return `<div class="order-row">
+    <div class="order-row__num">${order.orderNumber || '—'}</div>
+    <div class="order-row__client">${order.clientName || '—'}</div>
+    <div class="order-row__right">
+      <span class="order-row__total">${formatPrice(order.total)}</span>
+      ${statusChip(order.status)}
+      <span class="order-row__date">${formatDate(order.createdAt)}</span>
+    </div>
+  </div>`;
+}
+
+function formatMonthYear(d) {
+  return d.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' }).replace(/^\w/, c => c.toUpperCase());
+}
+
+
+// ═══ orders.js ═══
+/**
+ * orders.js — Gestión de pedidos (3 pasos) + listado
+ */
+
+const STEPS = ['Cliente', 'Productos', 'Confirmar'];
+
+// ─── Vista de listado ─────────────────────────────────────────────────────────
+
+async function renderOrders(container) {
+  let orders  = await getAllOrders();
+  let filter  = 'all';
+  let search  = '';
+
+  function filtered() {
+    return orders
+      .filter(o => filter === 'all' || (filter === 'pending' ? PENDING_STATUSES.includes(o.status) : o.status === filter))
+      .filter(o => !search || o.clientName?.toLowerCase().includes(search.toLowerCase()) || o.orderNumber?.includes(search))
+      .sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+  }
+
+  function renderList() {
+    const listEl = container.querySelector('#orders-list');
+    if (!listEl) return;
+    const list = filtered();
+    if (list.length === 0) {
+      listEl.innerHTML = `<p class="empty-msg">No hay pedidos con este filtro.</p>`;
+      return;
+    }
+    listEl.innerHTML = list.map(o => `
+      <div class="order-card" data-id="${o.id}">
+        <div class="order-card__top">
+          <span class="order-card__num">${esc(o.orderNumber)}</span>
+          ${statusChip(o.status)}
+        </div>
+        <div class="order-card__client">${esc(o.clientName || '—')}</div>
+        <div class="order-card__footer">
+          <span>${formatDate(o.createdAt)}</span>
+          <span class="order-card__total">${formatPrice(o.total)}</span>
+        </div>
+      </div>`).join('');
+
+    listEl.querySelectorAll('.order-card').forEach(el => {
+      el.addEventListener('click', () => showOrderDetail(Number(el.dataset.id), orders, () => {
+        getAllOrders().then(o => { orders.length=0; o.forEach(x => orders.push(x)); renderList(); });
+      }));
+    });
+  }
+
+  container.innerHTML = `
+    <div class="view-orders">
+      <div class="view-header">
+        <h2 class="view-header__title">Pedidos</h2>
+        <button class="btn btn--primary" id="btn-new-order">+ Nuevo pedido</button>
+      </div>
+      <div class="filter-bar">
+        <input class="field__input" id="search-orders" type="search" placeholder="Buscar pedido o cliente…">
+      </div>
+      <div class="status-tabs" id="status-tabs">
+        <button class="tab tab--active" data-filter="all">Todos</button>
+        <button class="tab" data-filter="pending">Pendientes</button>
+        ${Object.entries(ORDER_STATUS).map(([k,v]) =>
+          `<button class="tab" data-filter="${k}">${v.label}</button>`
+        ).join('')}
+      </div>
+      <div id="orders-list" class="orders-list"></div>
+    </div>`;
+
+  renderList();
+
+  container.querySelectorAll('.tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      container.querySelectorAll('.tab').forEach(b => b.classList.remove('tab--active'));
+      btn.classList.add('tab--active');
+      filter = btn.dataset.filter;
+      renderList();
+    });
+  });
+  container.querySelector('#search-orders').addEventListener('input', e => {
+    search = e.target.value;
+    renderList();
+  });
+  container.querySelector('#btn-new-order').addEventListener('click', () => {
+    openOrderWizard(async (newOrder) => {
+      await saveOrder(newOrder);
+      orders = await getAllOrders();
+      renderList();
+      toast(`Pedido ${newOrder.orderNumber} guardado`, 'success');
+    });
+  });
+}
+
+// ─── Detalle de pedido ────────────────────────────────────────────────────────
+
+async function showOrderDetail(orderId, allOrders, onUpdate) {
+  const order  = allOrders.find(o => o.id === orderId);
+  if (!order) return;
+  const storeName = await getSetting('storeName', 'VeritosBusiness');
+  const whatsapp  = await getSetting('whatsapp', '');
+
+  const content = document.createElement('div');
+  content.className = 'order-detail';
+
+  function render() {
+    content.innerHTML = `
+      <div class="order-detail__header">
+        <span class="order-detail__num">${esc(order.orderNumber)}</span>
+        ${statusChip(order.status)}
+      </div>
+      <p class="order-detail__client">👤 ${esc(order.clientName)} ${order.clientPhone ? `· 📞 ${esc(order.clientPhone)}` : ''}</p>
+      <p class="order-detail__date">📅 ${formatDate(order.createdAt)}</p>
+      <h4 class="section__title">Productos</h4>
+      <table class="order-table">
+        <thead><tr><th>Producto</th><th>Variante</th><th>Cant.</th><th>Precio</th></tr></thead>
+        <tbody>
+          ${(order.lines || []).map(l => `
+            <tr>
+              <td>${esc(l.productName)}</td>
+              <td>${esc(l.variantName || '—')}</td>
+              <td>${l.qty}</td>
+              <td>${formatPrice(l.totalPrice)}${l.discountAmount>0?` <small class="text-green">-${formatPrice(l.discountAmount)}</small>`:''}</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+      ${order.discount > 0 ? `<p class="text-right text-green">Descuento total: -${formatPrice(order.discount)}</p>` : ''}
+      <p class="order-detail__total">Total: <strong>${formatPrice(order.total)}</strong></p>
+      ${order.notes ? `<p class="order-detail__notes">📝 ${esc(order.notes)}</p>` : ''}
+      <h4 class="section__title">Cambiar estado</h4>
+      <div class="status-selector">
+        ${Object.entries(ORDER_STATUS).map(([k,v]) =>
+          `<button class="btn btn--sm status-btn ${order.status===k?'btn--primary':'btn--secondary'}"
+            data-status="${k}">${v.label}</button>`
+        ).join('')}
+      </div>`;
+
+    content.querySelectorAll('.status-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const newStatus = btn.dataset.status;
+        if (newStatus === order.status) return;
+        order.status = newStatus;
+        order.updatedAt = new Date().toISOString();
+        await saveOrder(order);
+        onUpdate();
+        render();
+        // Ofrecer WhatsApp si hay teléfono
+        if (order.clientPhone && whatsapp) {
+          const msg = orderStatusMessage(order, order.clientName, storeName, newStatus);
+          if (msg && await Promise.resolve({ confirm }).then(m => m.confirm(
+            `¿Enviar aviso de "${ORDER_STATUS[newStatus]?.label}" a ${order.clientName} por WhatsApp?`,
+            { confirmLabel: 'Abrir WhatsApp' }
+          ))) {
+            openWhatsApp(order.clientPhone.replace(/\D/g,''), msg);
+          }
+        }
+      });
+    });
+  }
+
+  render();
+
+  showModal({
+    title: 'Detalle de pedido',
+    content,
+    actions: [
+      { label: 'Cerrar', class: 'btn btn--secondary' },
+      ...(order.clientPhone && whatsapp ? [{
+        label: '💬 Resumen WhatsApp', class: 'btn btn--success', close: false,
+        callback: () => {
+          const msg = orderSummaryMessage(order, order.clientName, storeName);
+          openWhatsApp(order.clientPhone.replace(/\D/g,''), msg);
+        }
+      }] : []),
+    ]
+  });
+}
+
+// ─── Asistente de nuevo pedido (3 pasos) ──────────────────────────────────────
+
+async function openOrderWizard(onConfirm) {
+  const [clients, products, promotions] = await Promise.all([
+    getAllClients(), getAllProducts(), getAllPromotions()
+  ]);
+  const activePromos = getActivePromotions(promotions);
+
+  const state = {
+    step:    0,
+    client:  null,
+    lines:   [],  // { productId, variantId, productName, variantName, qty, unitPrice, costPrice, totalPrice, discountAmount, promoApplied }
+    notes:   '',
+  };
+
+  const wrap = document.createElement('div');
+  wrap.className = 'wizard';
+
+  function renderStep() {
+    wrap.innerHTML = `
+      <div class="wizard__steps">
+        ${STEPS.map((s, i) => `<div class="wizard__step ${i===state.step?'wizard__step--active':i<state.step?'wizard__step--done':''}">
+          <span class="wizard__step-num">${i < state.step ? '✓' : i+1}</span>
+          <span class="wizard__step-label">${s}</span>
+        </div>`).join('<div class="wizard__step-line"></div>')}
+      </div>
+      <div id="wizard-body" class="wizard__body"></div>
+      <div class="wizard__footer">
+        ${state.step > 0 ? `<button class="btn btn--secondary" id="wiz-back">← Atrás</button>` : '<span></span>'}
+        <button class="btn btn--primary" id="wiz-next">${state.step === STEPS.length-1 ? '✅ Confirmar pedido' : 'Siguiente →'}</button>
+      </div>`;
+
+    const body = wrap.querySelector('#wizard-body');
+
+    if (state.step === 0) renderStepClient(body, state, clients);
+    if (state.step === 1) renderStepProducts(body, state, products, activePromos);
+    if (state.step === 2) renderStepReview(body, state);
+
+    wrap.querySelector('#wiz-next').addEventListener('click', async () => {
+      if (state.step === 0) {
+        if (!state.client) { toast('Selecciona o crea un cliente', 'warning'); return; }
+        state.step = 1;
+      } else if (state.step === 1) {
+        if (state.lines.length === 0) { toast('Añade al menos un producto', 'warning'); return; }
+        state.step = 2;
+      } else {
+        const orderNum = await getNextOrderNumber();
+        const totals   = calcOrderTotal(state.lines);
+        const order    = {
+          orderNumber:  orderNum,
+          clientId:     state.client.id,
+          clientName:   state.client.name,
+          clientPhone:  state.client.phone || '',
+          lines:        state.lines,
+          ...totals,
+          costTotal:    state.lines.reduce((s,l) => s + (Number(l.costPrice)||0) * (l.qty||0), 0),
+          notes:        state.notes,
+          status:       'pending',
+        };
+        await onConfirm(order);
+        closeModal();
+        return;
+      }
+      renderStep();
+    });
+
+    wrap.querySelector('#wiz-back')?.addEventListener('click', () => {
+      state.step--;
+      renderStep();
+    });
+  }
+
+  renderStep();
+
+  showModal({
+    title: 'Nuevo pedido',
+    content: wrap,
+    actions: [],
+  });
+}
+
+// ─── Paso 1: Cliente ──────────────────────────────────────────────────────────
+
+function renderStepClient(body, state, clients) {
+  let search = '';
+
+  body.innerHTML = `
+    <div class="field">
+      <label class="field__label">Buscar cliente</label>
+      <input class="field__input" id="client-search" type="search" placeholder="Nombre o teléfono…" autocomplete="off">
+    </div>
+    <div id="client-results" class="client-results"></div>
+    ${state.client ? `<div class="selected-client">
+      <span class="selected-client__icon">✓</span>
+      <strong>${esc(state.client.name)}</strong> ${esc(state.client.phone||'')}
+      <button class="btn btn--sm btn--ghost" id="clear-client">Cambiar</button>
+    </div>` : ''}
+    <button class="btn btn--secondary btn--full" id="btn-new-wizard-client" style="margin-top:1rem">+ Crear cliente nuevo</button>`;
+
+  const resultsEl = body.querySelector('#client-results');
+
+  function showResults() {
+    const q = search.toLowerCase();
+    const matches = !q ? [] : clients.filter(c =>
+      c.name?.toLowerCase().includes(q) || c.phone?.includes(q)
+    ).slice(0,8);
+    resultsEl.innerHTML = matches.map(c => `
+      <div class="client-result-item" data-id="${c.id}">
+        <span class="client-result-item__avatar">${(c.name||'?')[0].toUpperCase()}</span>
+        <span>${esc(c.name)}</span>
+        <small>${esc(c.phone||'')}</small>
+      </div>`).join('');
+    resultsEl.querySelectorAll('.client-result-item').forEach(el => {
+      el.addEventListener('click', () => {
+        state.client = clients.find(c => c.id === Number(el.dataset.id));
+        renderStepClient(body, state, clients);
+      });
+    });
+  }
+
+  body.querySelector('#client-search').addEventListener('input', e => {
+    search = e.target.value;
+    showResults();
+  });
+
+  body.querySelector('#clear-client')?.addEventListener('click', () => {
+    state.client = null;
+    renderStepClient(body, state, clients);
+  });
+
+  body.querySelector('#btn-new-wizard-client').addEventListener('click', () => {
+    // Mini formulario inline de creación de cliente
+    const form = document.createElement('form');
+    form.innerHTML = `
+      <div class="field"><label class="field__label">Nombre *</label>
+        <input class="field__input" name="name" required placeholder="Nombre completo"></div>
+      <div class="field"><label class="field__label">Teléfono</label>
+        <input class="field__input" name="phone" type="tel" placeholder="600 123 456"></div>
+      <div id="dup-warn" class="alert alert--warning hidden">Ya existe un cliente con ese teléfono.</div>
+      <button class="btn btn--primary btn--full" type="submit">Crear cliente</button>`;
+
+    form.querySelector('[name=phone]').addEventListener('blur', async e => {
+      const phone = e.target.value.trim();
+      if (!phone) return;
+      const existing = await findClientByPhone(phone);
+      form.querySelector('#dup-warn').classList.toggle('hidden', existing.length === 0);
+    });
+
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      const newClient = { name: form.name.value.trim(), phone: form.phone.value.trim() };
+      const id = await saveClient(newClient);
+      newClient.id = id;
+      clients.push(newClient);
+      state.client = newClient;
+      renderStepClient(body, state, clients);
+    });
+
+    body.innerHTML = '';
+    body.appendChild(form);
+  });
+}
+
+// ─── Paso 2: Productos ────────────────────────────────────────────────────────
+
+function renderStepProducts(body, state, products, activePromos) {
+  const CATS = ['Nutrición y batidos','Bebidas y aloe','Barritas y snacks','Cuidado personal','Nutrición deportiva'];
+  let cat = CATS[0];
+
+  function recalcLines() {
+    state.lines.forEach(l => {
+      const variant = { price: l.unitPrice, productId: l.productId, variantId: l.variantId };
+      const r = calcLinePrice(variant, l.qty, activePromos);
+      l.totalPrice    = r.totalPrice;
+      l.discountAmount= r.discountAmount;
+      l.promoApplied  = r.promoApplied;
+    });
+  }
+
+  function renderBody() {
+    const catProducts = products.filter(p => p.category === cat && p.available !== false);
+    body.innerHTML = `
+      <div class="category-tabs">
+        ${CATS.map(c => `<button class="tab ${c===cat?'tab--active':''}" data-cat="${esc(c)}">${esc(c)}</button>`).join('')}
+      </div>
+      <div class="product-selector">
+        ${catProducts.length === 0 ? '<p class="empty-msg">Sin productos disponibles en esta categoría.</p>' :
+          catProducts.map(p => productItemHtml(p)).join('')}
+      </div>
+      <hr class="divider">
+      <h4 class="section__title">Líneas del pedido</h4>
+      <div id="order-lines">${renderLines()}</div>`;
+
+    body.querySelectorAll('.tab').forEach(btn => {
+      btn.addEventListener('click', () => { cat = btn.dataset.cat; renderBody(); });
+    });
+    body.querySelectorAll('.add-to-order').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const p = products.find(x => x.id === Number(btn.dataset.pid));
+        if (!p) return;
+        addToLines(p, btn.dataset.vid || null);
+        body.querySelector('#order-lines').innerHTML = renderLines();
+        attachLineEvents();
+      });
+    });
+    attachLineEvents();
+  }
+
+  function attachLineEvents() {
+    body.querySelectorAll('.line-qty').forEach(input => {
+      input.addEventListener('change', () => {
+        const idx = Number(input.closest('[data-line]').dataset.line);
+        state.lines[idx].qty = Math.max(1, parseInt(input.value)||1);
+        recalcLines();
+        body.querySelector('#order-lines').innerHTML = renderLines();
+        attachLineEvents();
+      });
+    });
+    body.querySelectorAll('.line-del').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = Number(btn.closest('[data-line]').dataset.line);
+        state.lines.splice(idx, 1);
+        body.querySelector('#order-lines').innerHTML = renderLines();
+        attachLineEvents();
+      });
+    });
+  }
+
+  function productItemHtml(p) {
+    if (p.variants?.length > 0) {
+      return `<div class="product-selector-item">
+        <strong>${esc(p.name)}</strong>
+        <div class="variant-buttons">
+          ${p.variants.filter(v => v.available !== false).map(v => `
+            <button class="btn btn--sm btn--secondary add-to-order" data-pid="${p.id}" data-vid="${v.id}">
+              ${esc(v.name || v.flavor || v.format || 'Variante')} — ${formatPrice(v.price)}
+            </button>`).join('')}
+        </div></div>`;
+    }
+    return `<div class="product-selector-item">
+      <strong>${esc(p.name)}</strong>
+      <span>${formatPrice(p.price)}</span>
+      <button class="btn btn--sm btn--primary add-to-order" data-pid="${p.id}">+ Añadir</button>
+    </div>`;
+  }
+
+  function addToLines(product, variantId) {
+    const variant = variantId
+      ? product.variants?.find(v => v.id === variantId)
+      : null;
+    const price     = variant ? Number(variant.price) : Number(product.price) || 0;
+    const costPrice = variant ? Number(variant.costPrice) : Number(product.costPrice) || 0;
+    const variantName = variant ? (variant.name || variant.flavor || variant.format || '') : '';
+
+    // ¿Ya existe esta línea?
+    const existing = state.lines.find(l => l.productId === product.id && l.variantId === (variantId||null));
+    if (existing) {
+      existing.qty++;
+      recalcLines();
+      return;
+    }
+
+    const vcVariant = { price, productId: product.id, variantId: variantId || null };
+    const result    = calcLinePrice(vcVariant, 1, activePromos);
+
+    state.lines.push({
+      productId:     product.id,
+      variantId:     variantId || null,
+      productName:   product.name,
+      variantName,
+      qty:           1,
+      unitPrice:     price,
+      costPrice,
+      totalPrice:    result.totalPrice,
+      discountAmount:result.discountAmount,
+      promoApplied:  result.promoApplied,
+    });
+  }
+
+  function renderLines() {
+    if (state.lines.length === 0) return '<p class="empty-msg">Sin productos añadidos.</p>';
+    const totals = calcOrderTotal(state.lines);
+    return `
+      ${state.lines.map((l, i) => `
+        <div class="line-row" data-line="${i}">
+          <div class="line-row__name">${esc(l.productName)}${l.variantName?` <small>(${esc(l.variantName)})</small>`:''}</div>
+          <div class="line-row__controls">
+            <input class="line-qty" type="number" min="1" value="${l.qty}" style="width:4rem">
+            <span>${formatPrice(l.totalPrice)}</span>
+            ${l.discountAmount>0?`<small class="text-green">-${formatPrice(l.discountAmount)}</small>`:''}
+            <button class="btn btn--sm btn--danger line-del">🗑</button>
+          </div>
+        </div>`).join('')}
+      <div class="line-row line-row--total">
+        ${totals.discount>0?`<span class="text-green">Descuento: -${formatPrice(totals.discount)}</span>`:''}
+        <strong>Total: ${formatPrice(totals.total)}</strong>
+      </div>`;
+  }
+
+  renderBody();
+}
+
+// ─── Paso 3: Revisión ─────────────────────────────────────────────────────────
+
+function renderStepReview(body, state) {
+  const totals = calcOrderTotal(state.lines);
+  body.innerHTML = `
+    <div class="review-section">
+      <h4 class="section__title">Cliente</h4>
+      <p><strong>${esc(state.client?.name)}</strong> ${esc(state.client?.phone||'')}</p>
+      <h4 class="section__title">Productos</h4>
+      <table class="order-table">
+        <thead><tr><th>Producto</th><th>Cant.</th><th>Precio</th></tr></thead>
+        <tbody>
+          ${state.lines.map(l => `<tr>
+            <td>${esc(l.productName)}${l.variantName?` <small>(${esc(l.variantName)})</small>`:''}</td>
+            <td>${l.qty}</td>
+            <td>${formatPrice(l.totalPrice)}${l.discountAmount>0?` <span class="text-green">-${formatPrice(l.discountAmount)}</span>`:''}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+      ${totals.discount>0?`<p class="text-green">Descuento total: -${formatPrice(totals.discount)}</p>`:''}
+      <p class="review-total">Total: <strong>${formatPrice(totals.total)}</strong></p>
+      <div class="field">
+        <label class="field__label">Notas del pedido</label>
+        <textarea class="field__input" id="order-notes" rows="2" placeholder="Instrucciones especiales…">${esc(state.notes)}</textarea>
+      </div>
+    </div>`;
+
+  body.querySelector('#order-notes').addEventListener('input', e => {
+    state.notes = e.target.value;
+  });
+}
+
+
+// ═══ clients.js ═══
+/**
+ * clients.js — Gestión de clientes
+ */
+
+async function renderClients(container) {
+  const [clients, orders, vipSpend, vipOrders] = await Promise.all([
+    getAllClients(),
+    getAllOrders(),
+    getSetting('vipMinSpend', 300),
+    getSetting('vipMinOrders', 10),
+  ]);
+  const vipSettings = { minSpend: vipSpend, minOrders: vipOrders };
+
+  let filter = '';
+
+  function filteredClients() {
+    if (!filter) return clients;
+    const q = filter.toLowerCase();
+    return clients.filter(c =>
+      c.name?.toLowerCase().includes(q) || c.phone?.includes(q)
+    );
+  }
+
+  function renderList() {
+    const list = filteredClients();
+    const listEl = container.querySelector('#clients-list');
+    if (!listEl) return;
+    if (list.length === 0) {
+      listEl.innerHTML = `<p class="empty-msg">No se encontraron clientes.</p>`;
+      return;
+    }
+    listEl.innerHTML = list.map(c => {
+      const cat = clientCategory(c, orders, vipSettings);
+      const co  = orders.filter(o => o.clientId === c.id && o.status === 'delivered');
+      const spent = co.reduce((s, o) => s + (o.total || 0), 0);
+      return `<div class="client-card" data-id="${c.id}">
+        <div class="client-card__avatar">${(c.name || '?')[0].toUpperCase()}</div>
+        <div class="client-card__info">
+          <div class="client-card__name">${esc(c.name)}</div>
+          <div class="client-card__meta">${esc(c.phone || '—')} · ${co.length} pedido${co.length !== 1 ? 's' : ''} · ${formatPrice(spent)}</div>
+        </div>
+        <div class="client-card__right">
+          ${categoryChip(cat)}
+        </div>
+      </div>`;
+    }).join('');
+
+    listEl.querySelectorAll('.client-card').forEach(el => {
+      el.addEventListener('click', () => {
+        const c = clients.find(x => x.id === Number(el.dataset.id));
+        if (c) showClientDetail(c, orders, vipSettings);
+      });
+    });
+  }
+
+  container.innerHTML = `
+    <div class="view-clients">
+      <div class="view-header">
+        <h2 class="view-header__title">Clientes <span class="badge">${clients.length}</span></h2>
+        <button class="btn btn--primary" id="btn-new-client">+ Nuevo</button>
+      </div>
+      <div class="search-bar">
+        <input class="field__input" id="search-clients" type="search" placeholder="Buscar por nombre o teléfono…" autocomplete="off">
+      </div>
+      <div id="clients-list" class="client-list"></div>
+    </div>`;
+
+  renderList();
+
+  container.querySelector('#search-clients').addEventListener('input', e => {
+    filter = e.target.value.trim();
+    renderList();
+  });
+
+  container.querySelector('#btn-new-client').addEventListener('click', () => {
+    showClientForm(null, async (data) => {
+      await saveClient(data);
+      clients.length = 0;
+      (await getAllClients()).forEach(c => clients.push(c));
+      renderList();
+      toast('Cliente guardado', 'success');
+    }, clients);
+  });
+}
+
+// ─── Formulario de cliente ────────────────────────────────────────────────────
+
+function showClientForm(existing, onSave, allClients) {
+  const isNew = !existing;
+  const form = document.createElement('form');
+  form.className = 'client-form';
+  form.innerHTML = `
+    <div class="field">
+      <label class="field__label">Nombre y apellidos *</label>
+      <input class="field__input" name="name" type="text" value="${esc(existing?.name || '')}" required placeholder="Nombre completo">
+    </div>
+    <div class="field">
+      <label class="field__label">Teléfono</label>
+      <input class="field__input" name="phone" type="tel" value="${esc(existing?.phone || '')}" placeholder="Ej: 600 123 456">
+    </div>
+    <div class="field">
+      <label class="field__label">Observaciones</label>
+      <textarea class="field__input" name="notes" rows="3" placeholder="Notas internas…">${esc(existing?.notes || '')}</textarea>
+    </div>
+    <div id="phone-warning" class="alert alert--warning hidden">Ya existe un cliente con ese teléfono.</div>`;
+
+  form.querySelector('[name=phone]').addEventListener('blur', async (e) => {
+    const phone = e.target.value.trim();
+    if (!phone) return;
+    const matches = allClients.filter(c => c.phone === phone && c.id !== existing?.id);
+    form.querySelector('#phone-warning').classList.toggle('hidden', matches.length === 0);
+  });
+
+  showModal({
+    title: isNew ? 'Nuevo cliente' : 'Editar cliente',
+    content: form,
+    actions: [
+      { label: 'Cancelar', class: 'btn btn--secondary' },
+      { label: 'Guardar', class: 'btn btn--primary', close: false, callback: async () => {
+        if (!form.reportValidity()) return;
+        const data = {
+          ...existing,
+          id:    existing?.id,
+          name:  form.name.value.trim(),
+          phone: form.phone.value.trim(),
+          notes: form.notes.value.trim(),
+        };
+        if (!data.id) delete data.id;
+        await onSave(data);
+        closeModal();
+      }},
+    ]
+  });
+}
+
+// ─── Detalle de cliente ───────────────────────────────────────────────────────
+
+function showClientDetail(client, allOrders, vipSettings) {
+  const clientOrders = allOrders
+    .filter(o => o.clientId === client.id)
+    .sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+  const delivered = clientOrders.filter(o => o.status === 'delivered');
+  const spent     = delivered.reduce((s, o) => s + (o.total || 0), 0);
+  const ticket    = delivered.length ? spent / delivered.length : 0;
+  const cat       = clientCategory(client, allOrders, vipSettings);
+
+  const lastDate  = delivered.length
+    ? new Date(Math.max(...delivered.map(o => new Date(o.createdAt))))
+    : null;
+
+  // Productos más comprados
+  const productCount = {};
+  delivered.forEach(o => (o.lines || []).forEach(l => {
+    const key = l.productName || l.productId;
+    productCount[key] = (productCount[key] || 0) + (l.qty || 1);
+  }));
+  const topProducts = Object.entries(productCount)
+    .sort((a,b) => b[1] - a[1]).slice(0,5);
+
+  const content = `
+    <div class="client-detail">
+      <div class="client-detail__header">
+        <div class="client-detail__avatar">${(client.name || '?')[0].toUpperCase()}</div>
+        <div>
+          <h3>${esc(client.name)}</h3>
+          <p>${esc(client.phone || 'Sin teléfono')} ${categoryChip(cat)}</p>
+        </div>
+      </div>
+      <div class="stats-mini-grid">
+        <div class="stat-mini"><span>${delivered.length}</span><small>Pedidos</small></div>
+        <div class="stat-mini"><span>${formatPrice(spent)}</span><small>Gastado</small></div>
+        <div class="stat-mini"><span>${formatPrice(ticket)}</span><small>Ticket medio</small></div>
+        <div class="stat-mini"><span>${lastDate ? relativeTime(lastDate.toISOString()) : '—'}</span><small>Última compra</small></div>
+      </div>
+      ${client.notes ? `<p class="client-detail__notes">${esc(client.notes)}</p>` : ''}
+      ${topProducts.length ? `
+        <h4 class="section__title">Productos favoritos</h4>
+        <ul class="simple-list">${topProducts.map(([n,c]) => `<li>${esc(n)} <span class="badge">${c}</span></li>`).join('')}</ul>` : ''}
+      <h4 class="section__title">Historial de pedidos</h4>
+      ${clientOrders.length === 0
+        ? '<p class="empty-msg">Sin pedidos.</p>'
+        : `<div class="order-list order-list--compact">${clientOrders.map(o => `
+            <div class="order-row order-row--compact">
+              <span>${esc(o.orderNumber)}</span>
+              <span>${formatPrice(o.total)}</span>
+              <span>${formatDate(o.createdAt)}</span>
+            </div>`).join('')}</div>`}
+    </div>`;
+
+  showModal({
+    title: 'Ficha de cliente',
+    content,
+    actions: [
+      { label: 'Cerrar', class: 'btn btn--secondary' },
+      ...(client.phone ? [{
+        label: '💬 WhatsApp', class: 'btn btn--success', close: false,
+        callback: () => openWhatsApp(client.phone.replace(/\D/g, ''), `Hola ${client.name} 👋`)
+      }] : []),
+      { label: '✏️ Editar', class: 'btn btn--primary', close: false,
+        callback: () => {
+          closeModal();
+          showClientForm(client, async (data) => {
+            await saveClient(data);
+            toast('Cliente actualizado', 'success');
+            closeModal();
+          }, []);
+        }
+      },
+    ]
+  });
+}
+
+
+// ═══ products.js ═══
+/**
+ * products.js — Gestión de productos y variantes
+ */
+
+const CATEGORIES = [
+  'Nutrición y batidos',
+  'Bebidas y aloe',
+  'Barritas y snacks',
+  'Cuidado personal',
+  'Nutrición deportiva',
+];
+
+async function renderProducts(container) {
+  let products = await getAllProducts();
+  let filterCat = 'all';
+  let filterText = '';
+
+  function filtered() {
+    return products.filter(p => {
+      if (filterCat !== 'all' && p.category !== filterCat) return false;
+      if (filterText && !p.name?.toLowerCase().includes(filterText.toLowerCase())) return false;
+      return true;
+    });
+  }
+
+  function renderGrid() {
+    const grid = container.querySelector('#products-grid');
+    if (!grid) return;
+    const list = filtered();
+    if (list.length === 0) {
+      grid.innerHTML = `<p class="empty-msg">No hay productos en esta categoría.</p>`;
+      return;
+    }
+    grid.innerHTML = '';
+    list.forEach(p => {
+      grid.appendChild(productCard(p, {
+        onEdit: () => showProductForm(p, async (updated) => {
+          await saveProduct(updated);
+          products = await getAllProducts();
+          renderGrid();
+          toast('Producto guardado', 'success');
+        }),
+      }));
+    });
+  }
+
+  container.innerHTML = `
+    <div class="view-products">
+      <div class="view-header">
+        <h2 class="view-header__title">Productos</h2>
+        <button class="btn btn--primary" id="btn-new-product">+ Nuevo</button>
+      </div>
+      <div class="filter-bar">
+        <input class="field__input" id="search-products" type="search" placeholder="Buscar…" autocomplete="off">
+      </div>
+      <div class="category-tabs" id="cat-tabs">
+        <button class="tab tab--active" data-cat="all">Todos</button>
+        ${CATEGORIES.map(c => `<button class="tab" data-cat="${esc(c)}">${esc(c)}</button>`).join('')}
+      </div>
+      <div id="products-grid" class="products-grid"></div>
+    </div>`;
+
+  renderGrid();
+
+  container.querySelector('#search-products').addEventListener('input', e => {
+    filterText = e.target.value;
+    renderGrid();
+  });
+
+  container.querySelectorAll('.tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      container.querySelectorAll('.tab').forEach(b => b.classList.remove('tab--active'));
+      btn.classList.add('tab--active');
+      filterCat = btn.dataset.cat;
+      renderGrid();
+    });
+  });
+
+  container.querySelector('#btn-new-product').addEventListener('click', () => {
+    showProductForm(null, async (data) => {
+      await saveProduct(data);
+      products = await getAllProducts();
+      renderGrid();
+      toast('Producto creado', 'success');
+    });
+  });
+}
+
+// ─── Formulario de producto ───────────────────────────────────────────────────
+
+function showProductForm(existing, onSave) {
+  const isNew = !existing;
+  const variants = existing ? JSON.parse(JSON.stringify(existing.variants || [])) : [];
+
+  const wrap = document.createElement('div');
+  wrap.className = 'product-form';
+
+  function buildForm() {
+    wrap.innerHTML = `
+      <div class="field">
+        <label class="field__label">Nombre *</label>
+        <input class="field__input" id="pf-name" type="text" value="${esc(existing?.name||'')}" required placeholder="Nombre del producto">
+      </div>
+      <div class="field">
+        <label class="field__label">Categoría *</label>
+        <select class="field__input" id="pf-category" required>
+          ${CATEGORIES.map(c => `<option value="${esc(c)}" ${existing?.category===c?'selected':''}>${esc(c)}</option>`).join('')}
+        </select>
+      </div>
+      <div class="field">
+        <label class="field__label">Descripción</label>
+        <textarea class="field__input" id="pf-desc" rows="2" placeholder="Descripción breve…">${esc(existing?.description||'')}</textarea>
+      </div>
+      <div class="field">
+        <label class="field__label">Fotografía</label>
+        <div class="img-preview-wrap">
+          <img id="pf-img-preview" src="${existing?.image||'./assets/placeholder.png'}" alt="Vista previa" class="img-preview"
+            onerror="this.src='./assets/placeholder.png'">
+        </div>
+        <input class="field__input" id="pf-image-url" type="url" placeholder="URL de la imagen (opcional)"
+          value="${esc(existing?.image||'')}">
+        <label class="btn btn--secondary btn--full" style="margin-top:0.5rem;cursor:pointer;">
+          📷 Cargar desde dispositivo
+          <input type="file" id="pf-image-file" accept="image/*" style="display:none">
+        </label>
+      </div>
+      <div class="field">
+        <label class="field__label toggle-label">
+          <span>Disponible</span>
+          <label class="toggle">
+            <input type="checkbox" id="pf-available" ${existing?.available!==false?'checked':''}>
+            <span class="toggle__slider"></span>
+          </label>
+        </label>
+      </div>
+      <hr class="divider">
+      <h4 class="section__title">Variantes <button type="button" class="btn btn--sm btn--ghost" id="add-variant">+ Añadir</button></h4>
+      <div id="variants-list"></div>`;
+
+    renderVariants();
+
+    wrap.querySelector('#pf-image-url').addEventListener('input', e => {
+      wrap.querySelector('#pf-img-preview').src = e.target.value || './assets/placeholder.png';
+    });
+    wrap.querySelector('#pf-image-file').addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        wrap.querySelector('#pf-img-preview').src = ev.target.result;
+        wrap.querySelector('#pf-image-url').value = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+    wrap.querySelector('#add-variant').addEventListener('click', () => {
+      variants.push({ id: uid(), name: '', flavor: '', format: '', price: '', costPrice: '', available: true });
+      renderVariants();
+    });
+  }
+
+  function renderVariants() {
+    const listEl = wrap.querySelector('#variants-list');
+    if (!listEl) return;
+    if (variants.length === 0) {
+      listEl.innerHTML = `<p class="text-muted">Sin variantes: precio único en el producto.</p>
+        <div class="field-row">
+          <div class="field"><label class="field__label">Precio venta *</label>
+            <input class="field__input" id="pf-price" type="number" min="0" step="0.01"
+              value="${esc(existing?.price||'')}" placeholder="0.00"></div>
+          <div class="field"><label class="field__label">Coste adquisición</label>
+            <input class="field__input" id="pf-cost" type="number" min="0" step="0.01"
+              value="${esc(existing?.costPrice||'')}" placeholder="0.00"></div>
+        </div>`;
+      return;
+    }
+    listEl.innerHTML = variants.map((v, i) => `
+      <div class="variant-row" data-idx="${i}">
+        <div class="variant-row__header">
+          <strong>Variante ${i+1}</strong>
+          <button type="button" class="btn btn--sm btn--danger variant-del" data-idx="${i}">🗑</button>
+        </div>
+        <div class="field-row">
+          <div class="field"><label class="field__label">Nombre</label>
+            <input class="field__input" data-field="name" value="${esc(v.name)}" placeholder="Nombre variante"></div>
+          <div class="field"><label class="field__label">Sabor</label>
+            <input class="field__input" data-field="flavor" value="${esc(v.flavor||'')}" placeholder="Sabor"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label class="field__label">Precio *</label>
+            <input class="field__input" data-field="price" type="number" min="0" step="0.01" value="${esc(v.price)}" placeholder="0.00"></div>
+          <div class="field"><label class="field__label">Coste</label>
+            <input class="field__input" data-field="costPrice" type="number" min="0" step="0.01" value="${esc(v.costPrice||'')}" placeholder="0.00"></div>
+        </div>
+        <label class="field__label toggle-label">
+          <span>Disponible</span>
+          <label class="toggle"><input type="checkbox" data-field="available" ${v.available!==false?'checked':''}><span class="toggle__slider"></span></label>
+        </label>
+      </div>`).join('');
+
+    listEl.querySelectorAll('.variant-del').forEach(btn => {
+      btn.addEventListener('click', () => {
+        variants.splice(Number(btn.dataset.idx), 1);
+        renderVariants();
+      });
+    });
+    listEl.querySelectorAll('input, select').forEach(input => {
+      input.addEventListener('input', () => {
+        const row  = input.closest('[data-idx]');
+        const idx  = Number(row.dataset.idx);
+        const field = input.dataset.field;
+        variants[idx][field] = input.type === 'checkbox' ? input.checked : input.value;
+      });
+    });
+  }
+
+  buildForm();
+
+  showModal({
+    title: isNew ? 'Nuevo producto' : 'Editar producto',
+    content: wrap,
+    actions: [
+      { label: 'Cancelar', class: 'btn btn--secondary' },
+      { label: 'Guardar', class: 'btn btn--primary', close: false, callback: async () => {
+        const name = wrap.querySelector('#pf-name')?.value.trim();
+        if (!name) { toast('El nombre es obligatorio', 'error'); return; }
+        const data = {
+          ...existing,
+          id:          existing?.id,
+          name,
+          category:    wrap.querySelector('#pf-category')?.value,
+          description: wrap.querySelector('#pf-desc')?.value.trim(),
+          image:       wrap.querySelector('#pf-image-url')?.value.trim() || null,
+          available:   wrap.querySelector('#pf-available')?.checked,
+          variants:    variants.length ? variants : [],
+          price:       variants.length ? null : Number(wrap.querySelector('#pf-price')?.value) || 0,
+          costPrice:   variants.length ? null : Number(wrap.querySelector('#pf-cost')?.value) || 0,
+        };
+        if (!data.id) delete data.id;
+        await onSave(data);
+        closeModal();
+      }},
+    ]
+  });
+}
+
+
+// ═══ promotions.js ═══
+/**
+ * promotions.js — Gestión de promociones
+ */
+
+const PROMO_TYPES = {
+  percent: '% Descuento porcentual',
+  fixed:   '€ Descuento fijo por unidad',
+  bundle:  '📦 Oferta por cantidad (pack)',
+};
+
+const STATUS_LABELS = {
+  upcoming: { label: 'Próxima',       color: '#E3F2FD', text: '#1565C0' },
+  active:   { label: 'Activa',        color: '#E8F5E9', text: '#1B5E20' },
+  ending:   { label: 'Acaba pronto',  color: '#FFF3E0', text: '#E65100' },
+  ended:    { label: 'Finalizada',    color: '#FAFAFA', text: '#757575' },
+  disabled: { label: 'Desactivada',   color: '#FFEBEE', text: '#B71C1C' },
+};
+
+function promoStatus(p) {
+  if (!p.enabled) return 'disabled';
+  const now = new Date();
+  if (p.startDate && new Date(p.startDate) > now) return 'upcoming';
+  if (p.endDate) {
+    const end = new Date(p.endDate);
+    if (end < now) return 'ended';
+    // Acaba en menos de 48h
+    if (end - now < 48 * 3600 * 1000) return 'ending';
+  }
+  return 'active';
+}
+
+async function renderPromotions(container) {
+  let promos   = await getAllPromotions();
+  let products = await getAllProducts();
+  let filter   = 'all';
+
+  function filtered() {
+    if (filter === 'all') return promos;
+    return promos.filter(p => promoStatus(p) === filter);
+  }
+
+  function renderList() {
+    const listEl = container.querySelector('#promos-list');
+    if (!listEl) return;
+    const list = filtered().sort((a,b) => {
+      const order = ['active','ending','upcoming','ended','disabled'];
+      return order.indexOf(promoStatus(a)) - order.indexOf(promoStatus(b));
+    });
+    if (list.length === 0) {
+      listEl.innerHTML = `<p class="empty-msg">No hay promociones con este filtro.</p>`;
+      return;
+    }
+    listEl.innerHTML = list.map(p => {
+      const st  = promoStatus(p);
+      const stl = STATUS_LABELS[st];
+      return `<div class="promo-card" data-id="${p.id}">
+        <div class="promo-card__header">
+          <span class="chip" style="background:${stl.color};color:${stl.text}">${stl.label}</span>
+          <strong>${esc(p.name)}</strong>
+          <label class="toggle promo-card__toggle" title="${p.enabled?'Desactivar':'Activar'}">
+            <input type="checkbox" class="promo-toggle" data-id="${p.id}" ${p.enabled?'checked':''}>
+            <span class="toggle__slider"></span>
+          </label>
+        </div>
+        <p class="promo-card__desc">${esc(promoDescription(p))}</p>
+        <div class="promo-card__meta">
+          ${p.startDate ? `<small>Inicio: ${formatDate(p.startDate)}</small>` : ''}
+          ${p.endDate   ? `<small>Fin: ${formatDate(p.endDate)}</small>` : '<small>Sin fecha de fin</small>'}
+        </div>
+        <div class="promo-card__actions">
+          <button class="btn btn--sm btn--secondary promo-edit" data-id="${p.id}">✏️ Editar</button>
+          <button class="btn btn--sm btn--danger promo-del" data-id="${p.id}">🗑 Eliminar</button>
+        </div>
+      </div>`;
+    }).join('');
+
+    listEl.querySelectorAll('.promo-toggle').forEach(cb => {
+      cb.addEventListener('change', async () => {
+        const p = promos.find(x => x.id === Number(cb.dataset.id));
+        if (!p) return;
+        p.enabled = cb.checked;
+        await savePromotion(p);
+        promos = await getAllPromotions();
+        renderList();
+        toast(p.enabled ? 'Promoción activada' : 'Promoción desactivada', 'info');
+      });
+    });
+    listEl.querySelectorAll('.promo-edit').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const p = promos.find(x => x.id === Number(btn.dataset.id));
+        if (p) showPromoForm(p, products, async (updated) => {
+          await savePromotion(updated);
+          promos = await getAllPromotions();
+          renderList();
+          toast('Promoción guardada', 'success');
+        });
+      });
+    });
+    listEl.querySelectorAll('.promo-del').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (await confirm('¿Eliminar esta promoción?', { confirmLabel: 'Eliminar', danger: true })) {
+          await deletePromotion(Number(btn.dataset.id));
+          promos = await getAllPromotions();
+          renderList();
+          toast('Promoción eliminada', 'info');
+        }
+      });
+    });
+  }
+
+  container.innerHTML = `
+    <div class="view-promotions">
+      <div class="view-header">
+        <h2 class="view-header__title">Promociones</h2>
+        <button class="btn btn--primary" id="btn-new-promo">+ Nueva</button>
+      </div>
+      <div class="status-tabs">
+        <button class="tab tab--active" data-filter="all">Todas</button>
+        ${Object.entries(STATUS_LABELS).map(([k,v]) =>
+          `<button class="tab" data-filter="${k}">${v.label}</button>`
+        ).join('')}
+      </div>
+      <div id="promos-list"></div>
+    </div>`;
+
+  renderList();
+
+  container.querySelectorAll('.tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      container.querySelectorAll('.tab').forEach(b => b.classList.remove('tab--active'));
+      btn.classList.add('tab--active');
+      filter = btn.dataset.filter;
+      renderList();
+    });
+  });
+
+  container.querySelector('#btn-new-promo').addEventListener('click', () => {
+    showPromoForm(null, products, async (data) => {
+      await savePromotion(data);
+      promos = await getAllPromotions();
+      renderList();
+      toast('Promoción creada', 'success');
+    });
+  });
+}
+
+function promoDescription(p) {
+  if (p.type === 'percent') return `${p.value}% de descuento`;
+  if (p.type === 'fixed')   return `${formatPrice(p.value)} de descuento por unidad`;
+  if (p.type === 'bundle')  return `${p.bundleQty} unidades por ${formatPrice(p.bundlePrice)}`;
+  return '';
+}
+
+// ─── Formulario de promoción ──────────────────────────────────────────────────
+
+function showPromoForm(existing, products, onSave) {
+  const wrap = document.createElement('div');
+
+  function buildForm() {
+    const type = existing?.type || 'percent';
+    const selectedProducts = existing?.productIds || [];
+
+    wrap.innerHTML = `
+      <div class="field">
+        <label class="field__label">Nombre *</label>
+        <input class="field__input" id="prom-name" value="${esc(existing?.name||'')}" required placeholder="Nombre de la promoción">
+      </div>
+      <div class="field">
+        <label class="field__label">Tipo *</label>
+        <select class="field__input" id="prom-type">
+          ${Object.entries(PROMO_TYPES).map(([k,v]) =>
+            `<option value="${k}" ${existing?.type===k?'selected':''}>${v}</option>`).join('')}
+        </select>
+      </div>
+      <div id="prom-type-fields"></div>
+      <div class="field">
+        <label class="field__label">Descripción (visible al cliente)</label>
+        <input class="field__input" id="prom-desc" value="${esc(existing?.description||'')}" placeholder="Descripción breve…">
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label class="field__label">Fecha inicio</label>
+          <input class="field__input" id="prom-start" type="datetime-local" value="${existing?.startDate ? toLocalInput(existing.startDate) : ''}">
+        </div>
+        <div class="field">
+          <label class="field__label">Fecha fin</label>
+          <input class="field__input" id="prom-end" type="datetime-local" value="${existing?.endDate ? toLocalInput(existing.endDate) : ''}">
+        </div>
+      </div>
+      <label class="field__label toggle-label">
+        <span>Activa</span>
+        <label class="toggle">
+          <input type="checkbox" id="prom-enabled" ${existing?.enabled!==false?'checked':''}>
+          <span class="toggle__slider"></span>
+        </label>
+      </label>
+      <h4 class="section__title">Aplicar a productos (vacío = todos)</h4>
+      <div class="product-checkboxes">
+        ${products.map(p => `
+          <label class="checkbox-label">
+            <input type="checkbox" class="prom-prod" value="${p.id}" ${selectedProducts.includes(p.id)?'checked':''}>
+            ${esc(p.name)}
+          </label>`).join('')}
+      </div>`;
+
+    renderTypeFields(wrap.querySelector('#prom-type-fields'), type, existing);
+
+    wrap.querySelector('#prom-type').addEventListener('change', e => {
+      renderTypeFields(wrap.querySelector('#prom-type-fields'), e.target.value, null);
+    });
+  }
+
+  buildForm();
+
+  showModal({
+    title: existing ? 'Editar promoción' : 'Nueva promoción',
+    content: wrap,
+    actions: [
+      { label: 'Cancelar', class: 'btn btn--secondary' },
+      { label: 'Guardar', class: 'btn btn--primary', close: false, callback: async () => {
+        const name = wrap.querySelector('#prom-name')?.value.trim();
+        if (!name) { toast('El nombre es obligatorio', 'error'); return; }
+        const type = wrap.querySelector('#prom-type')?.value;
+        const productIds = [...wrap.querySelectorAll('.prom-prod:checked')].map(cb => Number(cb.value));
+        const data = {
+          ...existing,
+          id:          existing?.id,
+          name,
+          type,
+          description: wrap.querySelector('#prom-desc')?.value.trim(),
+          enabled:     wrap.querySelector('#prom-enabled')?.checked,
+          startDate:   wrap.querySelector('#prom-start')?.value ? new Date(wrap.querySelector('#prom-start').value).toISOString() : null,
+          endDate:     wrap.querySelector('#prom-end')?.value   ? new Date(wrap.querySelector('#prom-end').value).toISOString()   : null,
+          productIds,
+          value:       type !== 'bundle' ? Number(wrap.querySelector('#prom-value')?.value) || 0 : null,
+          bundleQty:   type === 'bundle' ? Number(wrap.querySelector('#prom-bqty')?.value)  || 2 : null,
+          bundlePrice: type === 'bundle' ? Number(wrap.querySelector('#prom-bprice')?.value)|| 0 : null,
+        };
+        if (!data.id) delete data.id;
+        await onSave(data);
+        closeModal();
+      }},
+    ]
+  });
+}
+
+function renderTypeFields(el, type, existing) {
+  if (type === 'percent') {
+    el.innerHTML = `<div class="field"><label class="field__label">Porcentaje de descuento (%)</label>
+      <input class="field__input" id="prom-value" type="number" min="1" max="100" value="${existing?.value||''}" placeholder="Ej: 10"></div>`;
+  } else if (type === 'fixed') {
+    el.innerHTML = `<div class="field"><label class="field__label">Descuento fijo por unidad (€)</label>
+      <input class="field__input" id="prom-value" type="number" min="0.01" step="0.01" value="${existing?.value||''}" placeholder="Ej: 2.00"></div>`;
+  } else if (type === 'bundle') {
+    el.innerHTML = `<div class="field-row">
+      <div class="field"><label class="field__label">Unidades del pack</label>
+        <input class="field__input" id="prom-bqty" type="number" min="2" value="${existing?.bundleQty||2}"></div>
+      <div class="field"><label class="field__label">Precio del pack (€)</label>
+        <input class="field__input" id="prom-bprice" type="number" min="0" step="0.01" value="${existing?.bundlePrice||''}" placeholder="Ej: 35.00"></div>
+    </div>`;
+  }
+}
+
+function toLocalInput(iso) {
+  const d = new Date(iso);
+  const pad = n => String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+
+// ═══ stats.js ═══
+/**
+ * stats.js — Estadísticas y control económico
+ */
+
+async function renderStats(container) {
+  const [allOrders, allClients, vipSpend, vipOrders] = await Promise.all([
+    getAllOrders(),
+    getAllClients(),
+    getSetting('vipMinSpend', 300),
+    getSetting('vipMinOrders', 10),
+  ]);
+  const vipSettings = { minSpend: vipSpend, minOrders: vipOrders };
+
+  let period = 'month'; // day | month | year | custom
+  let customStart = null, customEnd = null;
+
+  function filterOrders() {
+    const now = new Date();
+    return allOrders.filter(o => {
+      if (o.status !== 'delivered') return false;
+      const d = new Date(o.createdAt);
+      if (period === 'day')   return d.toDateString() === now.toDateString();
+      if (period === 'month') return d.getFullYear()===now.getFullYear() && d.getMonth()===now.getMonth();
+      if (period === 'year')  return d.getFullYear()===now.getFullYear();
+      if (period === 'custom' && customStart && customEnd) {
+        return d >= new Date(customStart) && d <= new Date(customEnd + 'T23:59:59');
+      }
+      return true;
+    });
+  }
+
+  function renderContent() {
+    const orders = filterOrders();
+    const billing = orders.reduce((s, o) => s + (o.total||0), 0);
+    const cost    = orders.reduce((s, o) => s + (o.costTotal||0), 0);
+    const profit  = billing - cost;
+    const discount = orders.reduce((s, o) => s + (o.discount||0), 0);
+
+    // Clientes
+    const clientOrders = {};
+    orders.forEach(o => {
+      if (!clientOrders[o.clientId]) clientOrders[o.clientId] = [];
+      clientOrders[o.clientId].push(o);
+    });
+    const newClients       = allClients.filter(c => clientCategory(c, allOrders, vipSettings) === 'NUEVO').length;
+    const habitualClients  = allClients.filter(c => clientCategory(c, allOrders, vipSettings) === 'HABITUAL').length;
+    const inactiveClients  = allClients.filter(c => clientCategory(c, allOrders, vipSettings) === 'INACTIVO').length;
+    const avgSpend         = allClients.length ? billing / allClients.length : 0;
+
+    // Productos más vendidos
+    const prodSales = {};
+    orders.forEach(o => (o.lines||[]).forEach(l => {
+      const key = l.productName || l.productId;
+      if (!prodSales[key]) prodSales[key] = { name: key, qty: 0, revenue: 0 };
+      prodSales[key].qty     += l.qty || 0;
+      prodSales[key].revenue += l.totalPrice || 0;
+    }));
+    const topProducts = Object.values(prodSales).sort((a,b) => b.qty - a.qty).slice(0,10);
+
+    // Ventas por categoría
+    const catSales = {};
+    orders.forEach(o => (o.lines||[]).forEach(l => {
+      const cat = l.productCategory || 'Sin categoría';
+      catSales[cat] = (catSales[cat] || 0) + (l.totalPrice || 0);
+    }));
+
+    // Evolución de ventas (últimos 12 meses)
+    const monthlyData = buildMonthlyData(allOrders);
+
+    const main = container.querySelector('#stats-content');
+    if (!main) return;
+    main.innerHTML = `
+      <!-- Resumen económico -->
+      <section class="section">
+        <h3 class="section__title">Resumen económico</h3>
+        <div class="stats-grid stats-grid--4">
+          <div class="stat-card stat-card--blue">
+            <span class="stat-card__label">Facturación</span>
+            <span class="stat-card__value">${formatPrice(billing)}</span>
+          </div>
+          <div class="stat-card stat-card--orange">
+            <span class="stat-card__label">Coste mercancía</span>
+            <span class="stat-card__value">${formatPrice(cost)}</span>
+          </div>
+          <div class="stat-card stat-card--green">
+            <span class="stat-card__label">Beneficio bruto</span>
+            <span class="stat-card__value">${formatPrice(profit)}</span>
+          </div>
+          <div class="stat-card stat-card--purple">
+            <span class="stat-card__label">Descuentos concedidos</span>
+            <span class="stat-card__value">-${formatPrice(discount)}</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Clientes -->
+      <section class="section">
+        <h3 class="section__title">Clientes</h3>
+        <div class="stats-grid stats-grid--4">
+          <div class="stat-card"><span class="stat-card__label">Nuevos</span><span class="stat-card__value">${newClients}</span></div>
+          <div class="stat-card"><span class="stat-card__label">Habituales</span><span class="stat-card__value">${habitualClients}</span></div>
+          <div class="stat-card"><span class="stat-card__label">Inactivos</span><span class="stat-card__value">${inactiveClients}</span></div>
+          <div class="stat-card"><span class="stat-card__label">Gasto medio</span><span class="stat-card__value">${formatPrice(avgSpend)}</span></div>
+        </div>
+      </section>
+
+      <!-- Evolución de ventas -->
+      <section class="section">
+        <h3 class="section__title">Evolución mensual (12 meses)</h3>
+        <div class="chart-wrap">${renderBarChart(monthlyData)}</div>
+      </section>
+
+      <!-- Productos más vendidos -->
+      <section class="section">
+        <h3 class="section__title">Productos más vendidos</h3>
+        ${topProducts.length === 0 ? '<p class="empty-msg">Sin datos.</p>' : `
+          <table class="stats-table">
+            <thead><tr><th>Producto</th><th>Unidades</th><th>Facturación</th></tr></thead>
+            <tbody>${topProducts.map(p => `
+              <tr>
+                <td>${esc(p.name)}</td>
+                <td>${p.qty}</td>
+                <td>${formatPrice(p.revenue)}</td>
+              </tr>`).join('')}
+            </tbody>
+          </table>`}
+      </section>
+
+      <!-- Ventas por categoría -->
+      <section class="section">
+        <h3 class="section__title">Ventas por categoría</h3>
+        ${Object.keys(catSales).length === 0 ? '<p class="empty-msg">Sin datos.</p>' :
+          renderCategoryChart(catSales)}
+      </section>`;
+  }
+
+  container.innerHTML = `
+    <div class="view-stats">
+      <div class="view-header">
+        <h2 class="view-header__title">Estadísticas</h2>
+      </div>
+      <div class="period-tabs">
+        <button class="tab tab--active" data-period="day">Hoy</button>
+        <button class="tab" data-period="month">Este mes</button>
+        <button class="tab" data-period="year">Este año</button>
+        <button class="tab" data-period="custom">Personalizado</button>
+      </div>
+      <div id="custom-range" class="custom-range hidden">
+        <input class="field__input" id="stat-start" type="date">
+        <span>→</span>
+        <input class="field__input" id="stat-end" type="date">
+        <button class="btn btn--primary btn--sm" id="apply-custom">Aplicar</button>
+      </div>
+      <div id="stats-content"></div>
+    </div>`;
+
+  period = 'month';
+  renderContent();
+
+  container.querySelectorAll('.tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      container.querySelectorAll('.tab').forEach(b => b.classList.remove('tab--active'));
+      btn.classList.add('tab--active');
+      period = btn.dataset.period;
+      container.querySelector('#custom-range').classList.toggle('hidden', period !== 'custom');
+      if (period !== 'custom') renderContent();
+    });
+  });
+
+  container.querySelector('#apply-custom').addEventListener('click', () => {
+    customStart = container.querySelector('#stat-start').value;
+    customEnd   = container.querySelector('#stat-end').value;
+    renderContent();
+  });
+}
+
+// ─── Gráfico de barras SVG ────────────────────────────────────────────────────
+
+function buildMonthlyData(orders) {
+  const data = {};
+  const now  = new Date();
+  for (let i = 11; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    data[key] = { label: d.toLocaleDateString('es-ES',{month:'short',year:'2-digit'}), value: 0 };
+  }
+  orders.filter(o => o.status === 'delivered').forEach(o => {
+    const d = new Date(o.createdAt);
+    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    if (data[key]) data[key].value += o.total || 0;
+  });
+  return Object.values(data);
+}
+
+function renderBarChart(data) {
+  const max   = Math.max(...data.map(d => d.value), 1);
+  const W     = 100 / data.length;
+  const bars  = data.map((d, i) => {
+    const h = Math.round((d.value / max) * 100);
+    return `<g transform="translate(${i * W + W*0.1}%, 0)">
+      <rect x="0" y="${100-h}%" width="${W*0.8}%" height="${h}%" fill="var(--color-primary)" rx="2"/>
+      <text x="${W*0.4}%" y="98%" text-anchor="middle" class="chart-label">${d.label}</text>
+    </g>`;
+  }).join('');
+  return `<svg class="bar-chart" viewBox="0 0 400 180" preserveAspectRatio="none">
+    <style>.chart-label{font-size:9px;fill:var(--color-text-muted);}</style>
+    <g transform="translate(0,10)">${bars}</g>
+  </svg>`;
+}
+
+function renderCategoryChart(catSales) {
+  const total = Object.values(catSales).reduce((s, v) => s + v, 0) || 1;
+  const colors = ['#2E7D32','#43A047','#66BB6A','#A5D6A7','#C8E6C9'];
+  let rows = '';
+  let i = 0;
+  for (const [cat, val] of Object.entries(catSales).sort((a,b)=>b[1]-a[1])) {
+    const pct = Math.round((val/total)*100);
+    rows += `<div class="cat-bar">
+      <span class="cat-bar__label">${esc(cat)}</span>
+      <div class="cat-bar__track">
+        <div class="cat-bar__fill" style="width:${pct}%;background:${colors[i%colors.length]}"></div>
+      </div>
+      <span class="cat-bar__pct">${pct}% (${formatPrice(val)})</span>
+    </div>`;
+    i++;
+  }
+  return `<div class="cat-chart">${rows}</div>`;
+}
+
+
+// ═══ settings.js ═══
+/**
+ * settings.js — Configuración de la tienda y cuenta
+ */
+
+async function renderSettings(container) {
+  const settings = {
+    storeName:   await getSetting('storeName',   'VeritosBusiness'),
+    storeDesc:   await getSetting('storeDesc',   ''),
+    whatsapp:    await getSetting('whatsapp',    ''),
+    schedule:    await getSetting('schedule',    ''),
+    location:    await getSetting('location',    ''),
+    logo:        await getSetting('logo',        ''),
+    vipMinSpend: await getSetting('vipMinSpend', 300),
+    vipMinOrders:await getSetting('vipMinOrders',10),
+  };
+
+  container.innerHTML = `
+    <div class="view-settings">
+      <div class="view-header">
+        <h2 class="view-header__title">Configuración</h2>
+      </div>
+
+      <!-- Datos de la tienda -->
+      <section class="settings-section">
+        <h3 class="settings-section__title">Datos de la tienda</h3>
+        <form id="settings-form">
+          <div class="field">
+            <label class="field__label">Nombre de la tienda *</label>
+            <input class="field__input" id="s-name" type="text" value="${esc(settings.storeName)}" required>
+          </div>
+          <div class="field">
+            <label class="field__label">Presentación breve</label>
+            <textarea class="field__input" id="s-desc" rows="2">${esc(settings.storeDesc)}</textarea>
+          </div>
+          <div class="field">
+            <label class="field__label">Número de WhatsApp (con prefijo, sin +)</label>
+            <input class="field__input" id="s-wa" type="tel" value="${esc(settings.whatsapp)}" placeholder="34600123456">
+          </div>
+          <div class="field">
+            <label class="field__label">Horario de atención</label>
+            <input class="field__input" id="s-schedule" type="text" value="${esc(settings.schedule)}" placeholder="Lun-Vie 10:00-20:00">
+          </div>
+          <div class="field">
+            <label class="field__label">Lugar de recogida</label>
+            <input class="field__input" id="s-location" type="text" value="${esc(settings.location)}" placeholder="Dirección o punto de recogida">
+          </div>
+          <div class="field">
+            <label class="field__label">Logotipo (URL o carga desde dispositivo)</label>
+            <div class="img-preview-wrap">
+              <img id="logo-preview" src="${settings.logo||'./assets/placeholder.png'}" alt="Logo" class="img-preview"
+                onerror="this.src='./assets/placeholder.png'">
+            </div>
+            <input class="field__input" id="s-logo" type="url" value="${esc(settings.logo)}" placeholder="https://…">
+            <label class="btn btn--secondary" style="cursor:pointer;margin-top:0.5rem">
+              📷 Cargar logo
+              <input type="file" id="logo-file" accept="image/*" style="display:none">
+            </label>
+          </div>
+          <button type="submit" class="btn btn--primary btn--full">💾 Guardar cambios</button>
+        </form>
+      </section>
+
+      <!-- Criterios VIP -->
+      <section class="settings-section">
+        <h3 class="settings-section__title">Criterios para clientes VIP</h3>
+        <p class="text-muted">Un cliente VIP cumple al menos uno de estos criterios:</p>
+        <div class="field-row">
+          <div class="field">
+            <label class="field__label">Gasto mínimo (€)</label>
+            <input class="field__input" id="s-vip-spend" type="number" min="0" step="1" value="${settings.vipMinSpend}">
+          </div>
+          <div class="field">
+            <label class="field__label">Pedidos mínimos</label>
+            <input class="field__input" id="s-vip-orders" type="number" min="1" step="1" value="${settings.vipMinOrders}">
+          </div>
+        </div>
+        <button class="btn btn--primary btn--sm" id="save-vip">Guardar criterios VIP</button>
+      </section>
+
+      <!-- Seguridad -->
+      <section class="settings-section">
+        <h3 class="settings-section__title">Seguridad</h3>
+        <div class="settings-notice">
+          <strong>⚠️ Nota de seguridad:</strong> La contraseña de VeritosBusiness se guarda en este dispositivo
+          y protege contra acceso casual. No es equivalente a una autenticación de servidor.
+          La seguridad real de tus datos depende del bloqueo de pantalla de tu teléfono.
+        </div>
+        <button class="btn btn--secondary" id="btn-change-pass">🔑 Cambiar contraseña</button>
+      </section>
+
+      <!-- Copias de seguridad -->
+      <section class="settings-section">
+        <h3 class="settings-section__title">Copias de seguridad</h3>
+        <div class="settings-notice settings-notice--warning">
+          <strong>Riesgo de pérdida de datos:</strong> Todos tus datos (clientes, pedidos, productos)
+          están almacenados solo en este dispositivo. Si pierdes el teléfono o borras los datos del navegador
+          sin haber exportado una copia, <strong>no hay forma de recuperarlos</strong>.
+          Exporta una copia con regularidad y guárdala en un lugar seguro.
+        </div>
+        <div class="settings-actions">
+          <button class="btn btn--primary" id="btn-export">📥 Exportar copia de seguridad</button>
+          <label class="btn btn--secondary" style="cursor:pointer">
+            📤 Importar copia de seguridad
+            <input type="file" id="import-file" accept=".json" style="display:none">
+          </label>
+        </div>
+      </section>
+
+      <!-- Catálogo público -->
+      <section class="settings-section">
+        <h3 class="settings-section__title">Catálogo público</h3>
+        <p class="text-muted">Genera el archivo <code>catalog.json</code> para actualizar el catálogo público de «Mi catálogo Herbalife».</p>
+        <div class="settings-notice">
+          Este archivo <strong>no contiene costes, beneficios ni datos privados</strong>.
+          Solo incluye nombres, precios de venta, disponibilidad y promociones activas.
+        </div>
+        <button class="btn btn--primary" id="btn-export-catalog">🌿 Exportar catalog.json</button>
+      </section>
+    </div>`;
+
+  // ─── Formulario de tienda ───────────────────────────────────────────────────
+  container.querySelector('#s-logo').addEventListener('input', e => {
+    container.querySelector('#logo-preview').src = e.target.value || './assets/placeholder.png';
+  });
+  container.querySelector('#logo-file').addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    new Promise(res => {
+      const r = new FileReader();
+      r.onload = ev => res(ev.target.result);
+      r.readAsDataURL(file);
+    }).then(data => {
+      container.querySelector('#logo-preview').src = data;
+      container.querySelector('#s-logo').value = data;
+    });
+  });
+
+  container.querySelector('#settings-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    await Promise.all([
+      setSetting('storeName',  container.querySelector('#s-name').value.trim()),
+      setSetting('storeDesc',  container.querySelector('#s-desc').value.trim()),
+      setSetting('whatsapp',   container.querySelector('#s-wa').value.trim()),
+      setSetting('schedule',   container.querySelector('#s-schedule').value.trim()),
+      setSetting('location',   container.querySelector('#s-location').value.trim()),
+      setSetting('logo',       container.querySelector('#s-logo').value.trim()),
+    ]);
+    toast('Configuración guardada', 'success');
+  });
+
+  // ─── VIP ────────────────────────────────────────────────────────────────────
+  container.querySelector('#save-vip').addEventListener('click', async () => {
+    await Promise.all([
+      setSetting('vipMinSpend',  Number(container.querySelector('#s-vip-spend').value)  || 300),
+      setSetting('vipMinOrders', Number(container.querySelector('#s-vip-orders').value) || 10),
+    ]);
+    toast('Criterios VIP guardados', 'success');
+  });
+
+  // ─── Contraseña ──────────────────────────────────────────────────────────────
+  container.querySelector('#btn-change-pass').addEventListener('click', () => {
+    const form = document.createElement('form');
+    form.innerHTML = `
+      <div class="field"><label class="field__label">Contraseña actual</label>
+        <input class="field__input" name="current" type="password" required></div>
+      <div class="field"><label class="field__label">Nueva contraseña (mín. 4 caracteres)</label>
+        <input class="field__input" name="new" type="password" required minlength="4"></div>
+      <div class="field"><label class="field__label">Repetir nueva contraseña</label>
+        <input class="field__input" name="repeat" type="password" required minlength="4"></div>
+      <div id="pass-err" class="alert alert--danger hidden"></div>`;
+
+    showModal({
+      title: 'Cambiar contraseña',
+      content: form,
+      actions: [
+        { label: 'Cancelar', class: 'btn btn--secondary' },
+        { label: 'Cambiar', class: 'btn btn--primary', close: false, callback: async () => {
+          const cur = form.current.value, nw = form.new.value, rep = form.repeat.value;
+          const errEl = form.querySelector('#pass-err');
+          errEl.classList.add('hidden');
+          if (nw !== rep) { errEl.textContent = 'Las contraseñas no coinciden'; errEl.classList.remove('hidden'); return; }
+          try {
+            await changePassword(cur, nw);
+            toast('Contraseña cambiada', 'success');
+            closeModal();
+          } catch (err) {
+            errEl.textContent = err.message;
+            errEl.classList.remove('hidden');
+          }
+        }},
+      ]
+    });
+  });
+
+  // ─── Backup export ───────────────────────────────────────────────────────────
+  container.querySelector('#btn-export').addEventListener('click', async () => {
+    try {
+      await downloadBackup();
+      toast('Copia de seguridad descargada', 'success');
+    } catch (err) {
+      toast('Error al exportar: ' + err.message, 'error');
+    }
+  });
+
+  // ─── Backup import ───────────────────────────────────────────────────────────
+  container.querySelector('#import-file').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      const data = await restoreBackup(file);
+      const date = new Date(data.exportedAt).toLocaleString('es-ES');
+      const ok = await confirm(
+        `Se va a restaurar una copia del ${date} con ${data.clients.length} clientes, ${data.orders.length} pedidos y ${data.products.length} productos.\n\nSe sobrescribirán todos los datos actuales. ¿Continuar?`,
+        { confirmLabel: 'Restaurar', danger: true }
+      );
+      if (ok) {
+        await applyRestore(data);
+        toast('Copia de seguridad restaurada. Recarga la página.', 'success');
+        setTimeout(() => location.reload(), 2000);
+      }
+    } catch (err) {
+      toast('Error: ' + err.message, 'error');
+    }
+    e.target.value = '';
+  });
+
+  // ─── Catálogo público ─────────────────────────────────────────────────────
+  container.querySelector('#btn-export-catalog').addEventListener('click', async () => {
+    try {
+      const products   = await getAllProducts();
+      const promotions = await getAllPromotions();
+      const storeSettings = {
+        storeName: await getSetting('storeName',''),
+        storeDesc: await getSetting('storeDesc',''),
+        whatsapp:  await getSetting('whatsapp',''),
+        schedule:  await getSetting('schedule',''),
+        location:  await getSetting('location',''),
+        logo:      await getSetting('logo',''),
+      };
+      await exportPublicCatalog(products, promotions, storeSettings);
+      toast('catalog.json descargado. Súbelo a tu repositorio de Mi catálogo Herbalife.', 'success');
+    } catch (err) {
+      toast('Error al exportar catálogo: ' + err.message, 'error');
+    }
+  });
+}
+
+
+// ═══ app.js ═══
+/**
+ * app.js — Router principal y arranque de VeritosBusiness
+ */
+
+// ─── Estado global ────────────────────────────────────────────────────────────
+const App = {
+  currentView: null,
+};
+
+// ─── Rutas ────────────────────────────────────────────────────────────────────
+
+const ROUTES = {
+  dashboard:  renderDashboard,
+  orders:     renderOrders,
+  clients:    renderClients,
+  products:   renderProducts,
+  promotions: renderPromotions,
+  stats:      renderStats,
+  settings:   renderSettings,
+};
+
+async function navigate(view, params = {}) {
+  const renderer = ROUTES[view];
+  if (!renderer) return;
+  App.currentView = view;
+  updateNav(view);
+  const main = document.getElementById('vb-main');
+  main.innerHTML = '<div class="loading-view"><div class="spinner__ring"></div></div>';
+  try {
+    await renderer(main, params);
+  } catch (err) {
+    console.error('Error en vista', view, err);
+    main.innerHTML = `<div class="error-view"><p>Error al cargar esta sección.</p><pre>${err.message}</pre></div>`;
+  }
+}
+
+function updateNav(active) {
+  document.querySelectorAll('.nav__item').forEach(el => {
+    el.classList.toggle('nav__item--active', el.dataset.view === active);
+  });
+}
+
+// ─── Pantalla de login ────────────────────────────────────────────────────────
+
+function renderLoginScreen(isSetup = false) {
+  const root = document.getElementById('vb-root');
+  root.innerHTML = `
+    <div class="login-screen">
+      <div class="login-card">
+        <div class="login-logo">
+          <div class="login-logo__icon">V</div>
+          <div>
+            <h1 class="login-logo__title">VeritosBusiness</h1>
+            <p class="login-logo__sub">Gestión de distribuidora Herbalife</p>
+          </div>
+        </div>
+        ${isSetup ? `
+          <div class="login-notice">
+            <strong>Primera vez</strong> — Crea tus credenciales de acceso.
+          </div>` : ''}
+        <form id="login-form" class="login-form">
+          <div class="field">
+            <label class="field__label" for="f-user">Usuario</label>
+            <input class="field__input" id="f-user" type="text" autocomplete="username"
+              placeholder="Tu nombre de usuario" required>
+          </div>
+          <div class="field">
+            <label class="field__label" for="f-pass">Contraseña</label>
+            <div class="field__password-wrap">
+              <input class="field__input" id="f-pass" type="password" autocomplete="${isSetup ? 'new-password' : 'current-password'}"
+                placeholder="${isSetup ? 'Mínimo 4 caracteres' : 'Contraseña'}" required minlength="4">
+              <button type="button" class="field__eye" id="toggle-pass" aria-label="Mostrar contraseña">👁</button>
+            </div>
+          </div>
+          ${isSetup ? `
+            <div class="field">
+              <label class="field__label" for="f-pass2">Repetir contraseña</label>
+              <input class="field__input" id="f-pass2" type="password" placeholder="Repetir contraseña" required minlength="4">
+            </div>` : ''}
+          <div id="login-error" class="login-form__error hidden"></div>
+          <button type="submit" class="btn btn--primary btn--full">
+            ${isSetup ? 'Crear cuenta' : 'Acceder'}
+          </button>
+        </form>
+        <p class="login-security-note">
+          ⚠️ La contraseña se guarda en este dispositivo. La seguridad real depende del bloqueo de pantalla de tu teléfono.
+        </p>
+      </div>
+    </div>`;
+
+  document.getElementById('toggle-pass').addEventListener('click', () => {
+    const p = document.getElementById('f-pass');
+    p.type = p.type === 'password' ? 'text' : 'password';
+  });
+
+  document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const user  = document.getElementById('f-user').value.trim();
+    const pass  = document.getElementById('f-pass').value;
+    const errEl = document.getElementById('login-error');
+    errEl.classList.add('hidden');
+    try {
+      if (isSetup) {
+        const pass2 = document.getElementById('f-pass2').value;
+        if (pass !== pass2) throw new Error('Las contraseñas no coinciden');
+        await setupCredentials(user, pass);
+      } else {
+        await login(user, pass);
+      }
+      await bootApp();
+    } catch (err) {
+      errEl.textContent = err.message;
+      errEl.classList.remove('hidden');
+    }
+  });
+}
+
+// ─── Arranque principal ───────────────────────────────────────────────────────
+
+async function bootApp() {
+  const root = document.getElementById('vb-root');
+
+  // Renderizar shell de la app
+  root.innerHTML = `
+    <div class="app-layout">
+      <header class="app-header">
+        <button class="app-header__menu-btn" id="menu-btn" aria-label="Menú">☰</button>
+        <h1 class="app-header__title">VeritosBusiness</h1>
+        <div class="app-header__actions">
+          <button class="icon-btn" id="btn-logout" aria-label="Cerrar sesión" title="Cerrar sesión">⏻</button>
+        </div>
+      </header>
+      <div class="app-body">
+        <nav class="side-nav" id="side-nav">
+          <div class="side-nav__inner">
+            <ul class="nav__list">
+              ${navItem('dashboard',  '🏠', 'Inicio')}
+              ${navItem('orders',     '📦', 'Pedidos')}
+              ${navItem('clients',    '👤', 'Clientes')}
+              ${navItem('products',   '🌿', 'Productos')}
+              ${navItem('promotions', '🏷️',  'Promociones')}
+              ${navItem('stats',      '📊', 'Estadísticas')}
+              ${navItem('settings',   '⚙️',  'Configuración')}
+            </ul>
+          </div>
+        </nav>
+        <main id="vb-main" class="app-main"></main>
+      </div>
+    </div>`;
+
+  // Eventos de navegación
+  document.querySelectorAll('.nav__item').forEach(el => {
+    el.addEventListener('click', () => {
+      navigate(el.dataset.view);
+      closeSideNav();
+    });
+  });
+
+  // Menú hamburguesa
+  document.getElementById('menu-btn').addEventListener('click', toggleSideNav);
+  document.getElementById('btn-logout').addEventListener('click', async () => {
+    if (await Promise.resolve().then(() => confirm('¿Cerrar sesión?', { confirmLabel: 'Salir', danger: false }))) {
+      logout();
+      location.reload();
+    }
+  });
+
+  await navigate('dashboard');
+}
+
+function navItem(view, icon, label) {
+  return `<li class="nav__item" data-view="${view}" role="button" tabindex="0">
+    <span class="nav__icon">${icon}</span>
+    <span class="nav__label">${label}</span>
+  </li>`;
+}
+
+function toggleSideNav() {
+  document.getElementById('side-nav')?.classList.toggle('side-nav--open');
+}
+function closeSideNav() {
+  document.getElementById('side-nav')?.classList.remove('side-nav--open');
+}
+
+// ─── Inicialización ───────────────────────────────────────────────────────────
+
+async function init() {
+  try {
+    await openDB();
+    if (!isLoggedIn()) {
+      const firstRun = await isFirstRun();
+      renderLoginScreen(firstRun);
+    } else {
+      await bootApp();
+    }
+  } catch (err) {
+    console.error('Error al inicializar la app', err);
+    document.body.innerHTML = `<div class="fatal-error">
+      <h1>Error al iniciar VeritosBusiness</h1>
+      <p>${err.message}</p>
+      <p>Recarga la página e inténtalo de nuevo.</p>
+    </div>`;
+  }
+}
+
+// Registrar Service Worker — funciona en raíz y en subcarpeta GitHub Pages
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    // Calcula la base desde window.location para compatibilidad máxima
+    const base = window.location.pathname.replace(/\/[^/]*$/, '/');
+    navigator.serviceWorker.register(base + 'sw.js', { scope: base })
+      .catch(err => console.warn('SW no registrado:', err));
+  });
+}
+
+
+
+// ─── Arranque ─────────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    const base = window.location.pathname.replace(/\/[^\/]*$/, '/');
+    navigator.serviceWorker.register(base + 'sw.js', { scope: base }).catch(console.warn);
+  });
+}
+document.addEventListener('DOMContentLoaded', init);
+
   </script>
 </body>
 </html>
